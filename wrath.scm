@@ -30,7 +30,7 @@
           (mount-point "/boot/efi")
           (device (uuid "4B6C-4B80" 'fat32))
           (type "vfat"))
-         (file-syste
+         (file-system
           (mount-point "/home")
           (device "/dev/mapper/crypthome")
           (type "ext4")

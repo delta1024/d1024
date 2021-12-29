@@ -40,6 +40,14 @@
          (openpgp-fingerprint
           \"736a c00e 1254 378b a982  7af6 9dbe 8265 81b6 4490\")))))"))
 
+(define makefile
+  (plain-file "Makefile"
+	      "\
+home:
+	GUILE_LOAD_PATH=./ \\
+	guix home reconfigure ./wrath.scm
+system:
+	sudo -E guix system -L ../.config/guix/systems reconfigure ../.config/guix/wrath.scm"))
 
 (define base-system
   (local-file 
@@ -83,12 +91,14 @@
    (simple-service 'guix-files
 		   home-files-service-type
 		   (list
-		    `("config/guix/channels.scm"
-		      ,channels)
 		    `("system/channels.scm"
 		      ,channels)
 		    `("system/wrath.scm"
 		      ,wrath-user)
+		    `("system/Makefile"
+		      ,makefile)
+		    `("config/guix/channels.scm"
+		      ,channels)
 		    `("config/guix/wrath.scm"
 		      ,wrath-system)
 		    `("config/guix/systems/base-system.scm"

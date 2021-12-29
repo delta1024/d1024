@@ -1,6 +1,6 @@
 (define-module (d1024 services packages)
-#:use-module (gnu packages base)
 #:use-module (gnu packages)
+#:use-module (gnu packages base)
 #:use-module (gnu packages fonts)
 #:use-module (gnu packages fontutils)
 #:use-module (gnu packages admin)

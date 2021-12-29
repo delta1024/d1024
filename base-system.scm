@@ -84,6 +84,7 @@
         (specification->package "sx")
         (specification->package "gcc-toolchain")
         (specification->package "stumpwm")
+	(specification->package "make")
         (specification->package "gnupg")
         (specification->package "xauth")
         (specification->package "zsh")
