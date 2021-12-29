@@ -1,0 +1,73 @@
+#-*-conf-unix-*-
+#
+# wm independent hotkeys
+#
+
+
+
+# make sxhkd reload its configuration files:
+super + Escape
+        pkill -USR1 -x sxhkd
+#
+
+# Application Launhing
+# hc keybind $Mod-Shift-n spawn emacsclient -c -a "" --eval "(mu4e)"
+
+
+super + {shift + ,_,alt + ,control + ,alt + control + }n
+ {alacritty --class mpd\,mpd --title Music -e ncmpcpp,\
+  mpc toggle; nowplaying=`mpc | sed "3 d"`; dunstify $nowplaying -r 3,\
+  mpc next; nowplaying=`mpc | sed "3 d"`; dunstify $nowplaying -r 3,\
+  mpc prev; nowplaying=`mpc | sed "3 d"`; dunstify $nowplaying -r 3,\
+  nowplaying=`mpc | sed "3 d"`; dunstify $nowplaying -r 3}
+# hc keybind $Mod-e spawn $EDITOR
+super +{shift + ,_}u
+ {emacs, emacsclient -c}
+# hc keybind $Mod-Mod1-Return spawn $HOME/.config/herbstluftwm/dmenu_run_hlwm -c -l 10
+#Termenal stuff
+super + {_,shift + }Return
+ {alacritty,\
+     alacritty --class lf\,lf --title Files -e lf}
+# Screen lock options
+#super + {_,shift + }semicolon
+ #{/home/jake/.config/herbstluftwm/lock.sh,\
+  #   slock}
+# Open config select menu
+super + {_,shift + }y
+ {/home/jake/.scripts/wallpaper.sh set, killall cbatticon && cbatticon}
+# Current Games
+super + {shift + ,alt + ,_}v
+ {steam,\
+  heroic,\
+ /home/jake/.scripts/current-games.sh}
+# Toggle Picom
+super + p 
+ /home/jake/.scripts/picom-toggle.sh
+# Open man page in Zathura
+super + grave
+ /home/jake/.scripts/man.sh
+
+super + {shift + ,control + ,_}x
+ /home/jake/.scripts/prompt.sh {"power off? " "systemctl poweroff","restart? " "systemctl reboot","Suspend?" "systemctl suspend"}
+
+super + {_,alt + ,shift + ,control + ,control + shift + }r
+ {brave,\
+  /home/jake/.scripts/web/frequent-sites.sh,\
+  /home/jake/.scripts/web/brave-url.sh,\
+  /home/jake/.scripts/web/google.sh,\
+  /home/jake/.scripts/web/site-search.sh}
+super + alt + d
+ /home/jake/.scripts/web/download.sh
+
+super + {_,shift + ,shift + control + }g
+ /home/jake/.scripts/pen-init.sh {right,next,both}
+
+super + s
+ pavucontrol
+
+super + {shift + ,alt +}b 
+ {rustup doc,\
+ buetoothctl connect 28:9A:4B:19:05:5B && dunstify "Headset" "connection successful" || dunstify "Headset" "connection failed"
+
+super + c
+  dunstctl close
