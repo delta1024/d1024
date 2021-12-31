@@ -47,7 +47,9 @@ home:
 	GUILE_LOAD_PATH=./ \\
 	guix home reconfigure ./wrath.scm
 system:
-	sudo -E guix system -L ../.config/guix/systems reconfigure ../.config/guix/wrath.scm"))
+	sudo -E guix system -L ../.config/guix/systems reconfigure ../.config/guix/wrath.scm
+update-channel:
+	guix describe -f channels > ./d1024/channel-lock.scm"))
 
 (define base-system
   (local-file 
@@ -70,12 +72,14 @@ system:
   #:use-module (d1024 services emacs)
   #:use-module (d1024 services shells)
   #:use-module (d1024 services packages)
+  #:use-module (d1024 services x11)
   #:use-module (d1024 services guix)
   #:use-module (guix gexp))
 
 (home-environment
  (packages (append
             emacs-packages
+            desktop-packages
             wrath-packages))		
  (services
   (append
@@ -84,7 +88,7 @@ system:
    emacs-services
    guix-services
    stumpwm-services
-   )))"))
+   xmodmap-services)))"))
 
 (define-public guix-services
   (list

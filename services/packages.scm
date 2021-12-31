@@ -5,6 +5,19 @@
 #:use-module (gnu packages fontutils)
 #:use-module (gnu packages admin)
 #:use-module (gnu packages xorg)
+#:use-module (gnu packages dunst)
+#:use-module (gnu packages linux)
+#:use-module (gnu packages freedesktop)
+#:use-module (gnu packages gnome)
+#:use-module (gnu packages package-management)
+#:use-module (gnu packages compton)
+#:use-module (gnu packages video)
+#:use-module (gnu packages terminals)
+#:use-module (gnu packages wm)
+#:use-module (gnu packages image-viewers)
+#:use-module (gnu packages mpd)
+#:use-module (gnu packages xdisorg)
+#:use-module (gnu packages pulseaudio)
 #:use-module (gnu packages disk)
 #:use-module (gnu packages shells)
 #:use-module (gnu packages aspell)
@@ -31,3 +44,22 @@
         nushell
         fontconfig
         neovim))
+
+(define-public desktop-packages
+ (list dunst
+       brightnessctl
+       perl-file-mimeinfo
+       network-manager
+       ;;flatpak
+       picom
+       mpv
+       youtube-dl
+       alacritty
+       xmodmap
+       mpd
+       pavucontrol
+       xclip
+       polybar
+       xwallpaper
+       sxiv
+       redshift))

@@ -4,6 +4,17 @@
   #:use-module (gnu services)
   #:use-module (guix gexp))
 
+(define emacs-mode "\
+;;; -*- mode: common-lisp; -*-\n")
+
+(define custom-functions "\
+(defun emacs ()
+   \"Spawns Emacs\"
+   (run-shell-command \"emacsclient -c\"))
+(defcommand alacritty ()
+    ()
+  (run-shell-command \"alacritty\"))\n")
+
 (define startup-message "\
 (setf *startup-message* \"Hello\")\n")
 
@@ -17,21 +28,23 @@
 (define startup-programs "\
 (run-shell-command \"xsetroot -cursor_name left_ptr\")
 (run-shell-command \"picom\")
-;;(run-shell-command \"polybar panel\")
-(run-shell-command \"xmodmap .Xmodmap\")
+(run-shell-command \"polybar panel\")
+;;(run-shell-command \"xmodmap .Xmodmap\")
 (run-shell-command \"/home/jake/.scripts/wallpaper.sh draw\")\n")
 
 (define keymaps "\
-(stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd \"C-c\") \"exec alacritty\")
+(stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd \"C-c\") \"alacritty\")
 (stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd \"C-t\") \"send-raw-key\")
-(stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd \"c\") \"exec alacritty\")\n")
+(stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd \"c\") \"alacritty\")\n")
 
 (define stumpwmrc
   (list 
    `("config/stumpwm/config"
      ,(plain-file "stumpwmrc"
 		  (string-append
-		   mode-line
+;;		   mode-line
+		   emacs-mode
+		   custom-functions
 		   startup-programs
 		   keymaps)))))
 

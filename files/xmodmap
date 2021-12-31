@@ -1,7 +1,0 @@
-clear lock
-clear control
-keycode 66 = Control_L
-add control = Control_L
-add Lock = Control_R
-keycode  23 = BackSpace BackSpace BackSpace BackSpace
-keycode  22 = Tab ISO_Left_Tab Tab ISO_Left_Tab

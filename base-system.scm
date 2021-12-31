@@ -77,7 +77,7 @@
 (packages
  (append
   (list (specification->package "emacs")
-        (specification->package "emacs-exwm")
+        ;; (specification->package "emacs-exwm")
         (specification->package "git")
         (specification->package "stow")
         (specification->package "neovim")
@@ -91,8 +91,8 @@
        ;; (specification->package "flatpak")
         (specification->package "curl")
         (specification->package "system-config-printer")
-        (specification->package
-         "emacs-desktop-environment")
+        ;; (specification->package
+        ;;  "emacs-desktop-environment")
         (specification->package "nss-certs"))
   %base-packages))
 
@@ -103,8 +103,8 @@
                                     (xorg-configuration
                                      (xorg-configuration
                                       (keyboard-layout keyboard-layout)))))
-        (service xfce-desktop-service-type)
-        (service cups-service-type)
+       ;; (service xfce-desktop-service-type)
+       ;; (service cups-service-type)
         (service openssh-service-type)
         (service nix-service-type)
         (extra-special-file "/usr/bin/env"
