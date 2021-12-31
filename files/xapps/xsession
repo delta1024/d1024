@@ -7,11 +7,11 @@ redshift&
 dunst &
 xclip &
 $HOME/.scripts/wallpaper.sh draw
-EMACS_EXIT_CODE=146 #4242
+# EMACS_EXIT_CODE=146 #4242
 
-while [ $EMACS_EXIT_CODE -eq 146 ];
-do
-    emacs -mm -exwm --debug-init
-    EMACS_EXIT_CODE="$?"
-    # echo $EMACS_EXIT_CODE
-done
+# while [ $EMACS_EXIT_CODE -eq 146 ];
+# do
+#     emacs -mm -exwm --debug-init
+#     EMACS_EXIT_CODE="$?"
+#     # echo $EMACS_EXIT_CODE
+# done

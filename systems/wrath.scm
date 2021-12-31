@@ -47,7 +47,9 @@ home:
 	GUILE_LOAD_PATH=./ \\
 	guix home reconfigure ./home.scm
 system:
-	sudo -E guix system -L ../.config/guix/systems reconfigure ../.config/guix/system.scm
+	guix home -L ./ reconfigure ./home.scm \\
+	&& sudo -E guix system -L ../.config/guix/systems \\
+	reconfigure ../.config/guix/system.scm
 update-channel:
 	guix describe -f channels > ./d1024/channel-lock.scm"))
 
@@ -55,6 +57,49 @@ update-channel:
   (local-file 
    (string-append (getenv "HOME") "/.system/d1024/base-system.scm")))
 
+(define wrath-system
+  (plain-file "wrath-system.scm"
+	      "\
+(use-modules (gnu system keyboard)
+             (gnu system mapped-devices)
+             (gnu system file-systems)
+             (base-system))
+
+(operating-system
+ (inherit base-operating-system)
+ (host-name \"wrath\")			
+
+ (keyboard-layout (keyboard-layout \"us\" #:model \"thinkpad\"))
+
+ (mapped-devices
+  (list (mapped-device
+         (source
+          (uuid \"6773b52e-1496-407e-b1d8-9a2ac7f7820f\"))
+         (target \"system-root\")
+         (type luks-device-mapping))
+        (mapped-device
+         (source
+          (uuid \"08123a90-d66b-41ff-8f2c-4435292f7818\"))
+         (target \"crypthome\")
+         (type luks-device-mapping))))
+
+ (file-systems
+  (cons* (file-system
+          (mount-point \"/\")
+          (device \"/dev/mapper/system-root\")
+          (type \"ext4\")
+          (dependencies mapped-devices))
+         (file-system
+          (mount-point \"/boot/efi\")
+          (device (uuid \"4B6C-4B80\" 'fat32))
+          (type \"vfat\"))
+         (file-system
+          (mount-point \"/home\")
+          (device \"/dev/mapper/crypthome\")
+          (type \"ext4\")
+          (dependencies mapped-devices))
+         
+         %base-file-systems)))"))
 
 (define wrath-user
   (plain-file "wrath-home.scm"
@@ -85,9 +130,7 @@ update-channel:
    emacs-services
    guix-services
    stumpwm-services
-   xclip-services
-   redshift-services
-   xmodmap-services)))"))
+   xinitrc)))"))
 
 (define-public guix-services
   (list
@@ -102,6 +145,7 @@ update-channel:
 		      ,makefile)
 		    `("config/guix/channels.scm"
 		      ,channels)
+		    `("config/guix/system.scm"
+		      ,wrath-system)
 		    `("config/guix/systems/base-system.scm"
 		      ,base-system)))))
-		    

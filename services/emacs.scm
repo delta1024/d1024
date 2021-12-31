@@ -66,8 +66,7 @@
 	     (list #$(file-append emacs "/bin/emacs")
 		   "--daemon")
 	     #:pid-file "/var/run/emacsd.pid"))
-   (stop #~(make-kill-destructor))
-   ))
+   (stop #~(make-kill-destructor))))
 
 (define-public emacs-services
   (list

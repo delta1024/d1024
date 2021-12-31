@@ -100,6 +100,8 @@
  (cons* (service slim-service-type (slim-configuration
                                     (auto-login? #t)
                                     (default-user "jake")
+				    (auto-login-session
+				     (file-append stumpwm "/bin/stumpwm"))
                                     (xorg-configuration
                                      (xorg-configuration
                                       (keyboard-layout keyboard-layout)))))

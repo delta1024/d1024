@@ -1,7 +1,10 @@
 (define-module (d1024 services stumpwm)
   #:use-module (gnu home)
   #:use-module (gnu home services)
+  #:use-module (gnu home services shepherd)
+  #:use-module (gnu packages wm)
   #:use-module (gnu services)
+  #:use-module (gnu services shepherd)
   #:use-module (guix gexp))
 
 (define emacs-mode "\
@@ -27,9 +30,6 @@
 
 (define startup-programs "\
 (run-shell-command \"xsetroot -cursor_name left_ptr\")
-(run-shell-command \"picom\")
-(run-shell-command \"polybar panel\")
-;;(run-shell-command \"xmodmap .Xmodmap\")
 (run-shell-command \"/home/jake/.scripts/wallpaper.sh draw\")\n")
 
 (define keymaps "\
@@ -42,15 +42,15 @@
    `("config/stumpwm/config"
      ,(plain-file "stumpwmrc"
 		  (string-append
-;;		   mode-line
+		   ;;		   mode-line
 		   emacs-mode
 		   custom-functions
 		   startup-programs
 		   keymaps)))))
-
+   
 (define-public stumpwm-services
   (list
-   (simple-service 'stumpwm-service
+   (simple-service 'stumpwm-config
 		   home-files-service-type
 		   stumpwmrc)))
 		   

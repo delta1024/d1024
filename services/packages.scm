@@ -14,6 +14,7 @@
 #:use-module (gnu packages video)
 #:use-module (gnu packages terminals)
 #:use-module (gnu packages wm)
+#:use-module (gnu packages web-browsers)
 #:use-module (gnu packages image-viewers)
 #:use-module (gnu packages mpd)
 #:use-module (gnu packages xdisorg)
@@ -52,6 +53,7 @@
        network-manager
        ;;flatpak
        picom
+       qutebrowser
        mpv
        youtube-dl
        alacritty
