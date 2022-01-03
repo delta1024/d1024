@@ -56,7 +56,7 @@ home-lock:
         guix time-machine -C ./d1024/channel-lock.scm -- \\
 	home reconfigure ./home.scm
 system-lock:
-	GUILE_LOAD_PAHT=../.config/guix/systems/ \\
+	GUILE_LOAD_PATH=../.config/guix/systems/ \\
 	sudo -E guix time-machine -C ./d1024/chennel-lock.scm -- \\
 	system reconfigure ../.config/guix/system.scm"))
 
