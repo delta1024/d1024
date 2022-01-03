@@ -55,6 +55,7 @@
   (append
    wrath-packages-base))
    ;; large-packages))
+
 (define-public desktop-packages
    (list dunst
 	 brightnessctl

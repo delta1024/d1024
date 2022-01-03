@@ -47,11 +47,18 @@ home:
 	GUILE_LOAD_PATH=./ \\
 	guix home reconfigure ./home.scm
 system:
-	guix home -L ./ reconfigure ./home.scm \\
-	&& sudo -E guix system -L ../.config/guix/systems \\
-	reconfigure ../.config/guix/system.scm
-update-channel:
-	guix describe -f channels > ./d1024/channel-lock.scm"))
+	GUILE_LOAD_PATH=../.config/guix/systems/ \\
+	sudo -E guix system reconfigure ../.config/guix/system.scm
+channel:
+	guix describe -f channels > ./d1024/channel-lock.scm
+home-lock:
+	GUILE_LOAD_PATH=./ \\
+        guix time-machine -C ./d1024/channel-lock.scm -- \\
+	home reconfigure ./home.scm
+system-lock:
+	GUILE_LOAD_PAHT=../.config/guix/systems/ \\
+	sudo -E guix time-machine -C ./d1024/chennel-lock.scm -- \\
+	system reconfigure ../.config/guix/system.scm"))
 
 (define base-system
   (local-file 
@@ -101,7 +108,7 @@ update-channel:
          
          %base-file-systems)))"))
 
-(define wrath-user
+(define wrath-home
   (plain-file "wrath-home.scm"
 	      "\
 (define-module (wrath)
@@ -140,7 +147,7 @@ update-channel:
 		    `("system/channels.scm"
 		      ,channels)
 		    `("system/home.scm"
-		      ,wrath-user)
+		      ,wrath-home)
 		    `("system/Makefile"
 		      ,makefile)
 		    `("config/guix/channels.scm"

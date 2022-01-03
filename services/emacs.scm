@@ -8,6 +8,7 @@
   #:use-module (gnu home)
   #:use-module (gnu home services)
   #:use-module (gnu home services shepherd)
+  #:use-module (gnu home-services emacs)
   #:use-module (srfi srfi-11)
   #:use-module (guix packages)
   #:use-module (guix gexp)
