@@ -120,7 +120,6 @@ update-channel:
 
 (home-environment
  (packages (append
-            emacs-packages
             desktop-packages
             wrath-packages))		
  (services
