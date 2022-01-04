@@ -53,8 +53,8 @@
 
 (define-public wrath-packages
   (append
-   wrath-packages-base))
-   ;; large-packages))
+   wrath-packages-base
+   large-packages))
 
 (define-public desktop-packages
    (list dunst

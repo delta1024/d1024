@@ -1,4 +1,4 @@
-(define-module (d1024 base-system)
+(define-module (base-system)
   #:use-module (gnu)
   #:use-module (gnu packages shells)
   #:use-module (gnu packages wm)

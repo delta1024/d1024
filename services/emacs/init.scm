@@ -96,7 +96,7 @@
    basic-init
    keyboard
    dired
-   org-mode
+;   org-mode
    development
    misc
    runtime-optimization))

@@ -49,6 +49,10 @@ home:
 system:
 	GUILE_LOAD_PATH=../.config/guix/systems/ \\
 	sudo -E guix system reconfigure ../.config/guix/system.scm
+emacs:
+	guile_load_path=./ \\
+	guix home reconfigure ./home.scm \\
+	herd restart emacs-server
 channel:
 	guix describe -f channels > ./d1024/channel-lock.scm
 home-lock:
@@ -56,8 +60,8 @@ home-lock:
         guix time-machine -C ./d1024/channel-lock.scm -- \\
 	home reconfigure ./home.scm
 system-lock:
-	GUILE_LOAD_PATH=../.config/guix/systems/ \\
-	sudo -E guix time-machine -C ./d1024/chennel-lock.scm -- \\
+	GUILE_LOAD_PATH=$HOME/.config/guix/systems/ \\
+	sudo -E guix time-machine -C ./d1024/channel-lock.scm -- \\
 	system reconfigure ../.config/guix/system.scm"))
 
 (define base-system
@@ -105,8 +109,11 @@ system-lock:
           (device \"/dev/mapper/crypthome\")
           (type \"ext4\")
           (dependencies mapped-devices))
-         
-         %base-file-systems)))"))
+         %base-file-systems))
+  (swap-devices
+   (list
+    (swap-space
+     (target \"/tempSwap\")))))"))
 
 (define wrath-home
   (plain-file "wrath-home.scm"

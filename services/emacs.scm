@@ -66,29 +66,4 @@
 	       early-init)
 	      (init-el
 	       init)))))
-		      
-
-;; (define emacs-shepherd
-;;   (shepherd-service
-;;    (documentation "spawns emacs as a daemon")
-;;    (provision '(emacsd))
-;;    (start #~(make-forkexec-constructor
-;; 	     (list #$(file-append emacs "/bin/emacs")
-;; 		   "--daemon")
-;; 	     #:pid-file "/var/run/emacsd.pid"))
-;;    (stop #~(make-kill-destructor))))
-
-;; (define-public emacs-services
-;;   (list
-;;    (simple-service 'emacs-init
-;; 		   home-files-service-type
-;; 		   (list
-;; 		    `("config/emacs/init.el"
-;; 		      ,init)
-;; 		    `("config/emacs/early-init.el"
-;; 		      ,early-init)))
-;;    (simple-service 'emacs-server
-;; 		   home-shepherd-service-type
-;; 		   (list
-;; 		    emacs-shepherd))))
 	
