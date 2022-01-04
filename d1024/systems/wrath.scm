@@ -44,13 +44,13 @@
   (plain-file "Makefile"
 	      "\
 home:
-	GUILE_LOAD_PATH=./ \\
+	GUILE_LOAD_PATH=./d1024/ \\
 	guix home reconfigure ./home.scm
 system:
 	GUILE_LOAD_PATH=../.config/guix/systems/ \\
 	sudo -E guix system reconfigure ../.config/guix/system.scm
 emacs:
-	GUILE_LOAD_PATH=./ \\
+	GUILE_LOAD_PATH=./d1024/ \\
 	guix home reconfigure ./home.scm && \\
         emacs --debug-init
 channel:
