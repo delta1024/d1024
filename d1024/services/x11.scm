@@ -40,7 +40,7 @@ keycode  22 = Tab ISO_Left_Tab Tab ISO_Left_Tab"))
 ;;;;;;;;;;;;;;;;Redshift;;;;;;;;;;;;;;;;;;;;;;;
 
 (define redshift-conf
-  (local-file (string-append (getenv "HOME") "/.system/d1024/files/xapps/redshift.conf")))
+  (local-file (string-append (getenv "HOME") "/.system/d1024/d1024/files/xapps/redshift.conf")))
 
 (define redshift-shepherd
   (shepherd-service
@@ -90,7 +90,7 @@ keycode  22 = Tab ISO_Left_Tab Tab ISO_Left_Tab"))
 (define polybar-conf
   (local-file (string-append
 	       (getenv "HOME")
-	       "/.system/d1024/files/xapps/polybar.config")))
+	       "/.system/d1024/d1024/files/xapps/polybar.config")))
 
 (define-public polybar-services
   (list
@@ -107,7 +107,7 @@ keycode  22 = Tab ISO_Left_Tab Tab ISO_Left_Tab"))
 (define picom-conf
   (local-file (string-append
 	       (getenv "HOME")
-	       "/.system/d1024/files/xapps/picom.conf")))
+	       "/.system/d1024/d1024/files/xapps/picom.conf")))
 
 (define picom-shepherd
    (shepherd-service

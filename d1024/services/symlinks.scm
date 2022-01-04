@@ -4,7 +4,7 @@
   #:use-module (gnu services)
   #:use-module (guix gexp))
 
-(define conf-files (string-append (getenv "HOME") "/.system/d1024/files/"))
+(define conf-files (string-append (getenv "HOME") "/.system/d1024/d1024/files/"))
 (define alacritty-yml
   (local-file (string-append conf-files "xapps/alacritty.yml")))
 (define neofetch-conf

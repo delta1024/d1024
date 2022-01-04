@@ -66,7 +66,7 @@ system-lock:
 
 (define base-system
   (local-file 
-   (string-append (getenv "HOME") "/.system/d1024/base-system.scm")))
+   (string-append (getenv "HOME") "/.system/d1024/d1024/base-system.scm")))
 
 (define wrath-system
   (plain-file "wrath-system.scm"
