@@ -1,4 +1,5 @@
 (define-module (d1024 services emacs org)
+  #:use-module (guix gexp)
   #:use-module (d1024 services emacs org capture)
   #:use-module (d1024 services emacs org use-package)
   #:use-module (d1024 services emacs org packages))
@@ -34,10 +35,10 @@
             (sequence "MAYBE" "|" "DEAD(@)")))))
 
 (define org-open-file
-  '((defun my/org-open-file (a)  "Opens the file in `org-directory'"
+  `((defun my/org-open-file (a)  "Opens the file in `org-directory'"
       (interactive (list (read-file-name "What File? " org-directory)))
-      ;; (find-file (expand-file-name (concat a ".org") org-directory)))
-      (find-file  a))))
+      (find-file  a))
+    ,#~";; (find-file (expand-file-name (concat a \".org\") org-directory))"))
 
 (define-public org-mode
   (append

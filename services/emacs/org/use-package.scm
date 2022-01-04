@@ -7,9 +7,9 @@
 		 :no-require t
 		 :init
 		 (require 'org-habit)
-		 :bind ((:map org-mode-map
-			 ("c-c o" . consult-outline)))
-		 ,#~"  ([remap evil-jump-forward] . org-cycle)"
+		 ,#~":bind ((:map org-mode-map
+			    (\"C-c o\" . consult-outline)
+		            ([remap evil-jump-forward] . org-cycle)))"
 		 :hook (org-mode . my/org-mode-setup)
 		 :config
 		 (defun my/org-font-setup ()

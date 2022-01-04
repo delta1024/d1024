@@ -50,9 +50,9 @@ system:
 	GUILE_LOAD_PATH=../.config/guix/systems/ \\
 	sudo -E guix system reconfigure ../.config/guix/system.scm
 emacs:
-	guile_load_path=./ \\
-	guix home reconfigure ./home.scm \\
-	herd restart emacs-server
+	GUILE_LOAD_PATH=./ \\
+	guix home reconfigure ./home.scm && \\
+        emacs --debug-init
 channel:
 	guix describe -f channels > ./d1024/channel-lock.scm
 home-lock:
