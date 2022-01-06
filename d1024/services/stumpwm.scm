@@ -1,52 +1,75 @@
 (define-module (d1024 services stumpwm)
   #:use-module (gnu home)
   #:use-module (gnu home services)
+  #:use-module (gnu home-services-utils)
   #:use-module (gnu home services shepherd)
   #:use-module (gnu packages wm)
+  #:use-module (srfi srfi-26)
+  #:use-module (gnu services configuration)
+  #:use-module (srfi srfi-1)
+  #:use-module (ice-9 curried-definitions)
+  #:use-module (ice-9 pretty-print)
   #:use-module (gnu services)
   #:use-module (gnu services shepherd)
   #:use-module (guix gexp))
 
-(define emacs-mode "\
-;;; -*- mode: common-lisp; -*-\n")
+(define (serialize-commonlisp-config val)
+  (define (serialize-list-element elem)
+    (cond
+     ((gexp? elem)
+      elem)
+     (else
+      #~(string-trim-right
+	 (with-output-to-string
+	   (lambda ()
+	     ((@@ (ice-9 pretty-print) pretty-print)
+	      '#$elem
+	      #:max-expr-width 79)))
+	 #\newline))))
+  #~(string-append
+     #$@(interpose
+	 (map serialize-list-element val)
+	 "\n" 'suffix)))
 
-(define custom-functions "\
-(defun emacs ()
-   \"Spawns Emacs\"
-   (run-shell-command \"emacsclient -c\"))
-(defcommand alacritty ()
-    ()
-  (run-shell-command \"alacritty\"))\n")
+(define emacs-mode (list #~";;-*- mode: common-lisp; -*-\n"))
 
-(define startup-message "\
-(setf *startup-message* \"Hello\")\n")
+(define custom-functions
+ `(,#~"(defun emacs ()
+  (run-shell-command \"emacsclient -c\"))"
+   (defcommand alacritty ()
+     ()
+     (run-shell-command "alacritty"))))
 
-(define mode-line "\
-(stumpwm:toggle-mode-line (stumpwm:current-screen)
-                 	    (stumpwm:current-head))
-(setf stumpwm:*screen-mode-line-format*
+(define startup-message 
+  '((setf *startup-message* "Hello")))
+
+(define mode-line 
+ `((stumpwm:toggle-mode-line (stumpwm:current-screen)
+                 	     (stumpwm:current-head))
+   ,#~"(setf stumpwm:*screen-mode-line-format*
     (list \"%w | \"
-          \"%d\"))\n")
+         \"%d\"))"))
 
-(define startup-programs "\
-(run-shell-command \"xsetroot -cursor_name left_ptr\")
-(run-shell-command \"/home/jake/.scripts/wallpaper.sh draw\")\n")
+(define startup-programs 
+  '((run-shell-command "xsetroot -cursor_name left_ptr")
+   (run-shell-command "/home/jake/.scripts/wallpaper.sh draw")))
 
-(define keymaps "\
-(stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd \"C-c\") \"alacritty\")
-(stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd \"C-t\") \"send-raw-key\")
-(stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd \"c\") \"alacritty\")\n")
+(define keybinds 
+  '((stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd "C-c") "alacritty")
+   (stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd "C-t") "send-raw-key")
+   (stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd "c") "alacritty")))
 
 (define stumpwmrc
   (list 
    `("config/stumpwm/config"
-     ,(plain-file "stumpwmrc"
-		  (string-append
+     ,(mixed-text-file "stumpwmrc"
+		  (serialize-commonlisp-config
+		   (append
 		   ;;		   mode-line
 		   emacs-mode
 		   custom-functions
 		   startup-programs
-		   keymaps)))))
+		   keybinds))))))
    
 (define-public stumpwm-services
   (list
