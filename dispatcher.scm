@@ -4,12 +4,15 @@
 	     (guix gexp))
 
 (define make-target (getenv "D1024_TARGET"))
+(define system (gethostname))
 
 (define channels
   (local-file 
    (string-append (getenv "HOME") "/.system/d1024/d1024/channels.scm")))
 
-(load (string-append (getenv "HOME") "/.system/d1024/d1024/systems/wrath.scm"))
+(load (string-append (getenv "HOME")
+		     "/.system/d1024/d1024/systems/"
+		     system ".scm"))
 
 
 (use-modules (ice-9 match))
@@ -19,4 +22,3 @@
       ("sys-config" wrath-system)))
 
 (dispatch)
-

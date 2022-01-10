@@ -4,7 +4,7 @@
 	     (gnu system file-systems)
 	     (d1024 base-system))
 
-(define wrath-system
+(define system
   (operating-system
    (inherit base-operating-system)
    (host-name "wrath")			
@@ -69,7 +69,7 @@
 		      ,channels)))))
 
 
-(define wrath-home
+(define home
   (home-environment
    (packages (append
               desktop-packages
@@ -81,4 +81,4 @@
      emacs-services
      guix-services
      stumpwm-services
-     xinitrc))))
+     xinitrc-personal))))

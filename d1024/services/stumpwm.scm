@@ -52,7 +52,7 @@
 
 (define startup-programs 
   '((run-shell-command "xsetroot -cursor_name left_ptr")
-   (run-shell-command "/home/jake/.scripts/wallpaper.sh draw")))
+  (run-shell-command "/home/jake/.bin/wallpaper.sh draw")))
 
 (define keybinds 
   '((stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd "C-c") "alacritty")

@@ -143,7 +143,7 @@ keycode  22 = Tab ISO_Left_Tab Tab ISO_Left_Tab"))
 			       (list #$(file-append xsetroot "/bin/xsetroot")
 				     "-cursor-name left_ptr"))))))))
 
-(define-public xinitrc
+(define-public xinitrc-personal
   (append
    xclip-services
    redshift-services
