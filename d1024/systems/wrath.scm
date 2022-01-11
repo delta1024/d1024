@@ -1,6 +1,7 @@
 (use-modules (gnu system)
 	     (gnu system keyboard)
 	     (gnu system mapped-devices)
+	     (gnu home-services state)
 	     (gnu system file-systems)
 	     (d1024 base-system))
 
@@ -48,11 +49,12 @@
  (gnu)
  (gnu home)
  (gnu home services)
+ (gnu home-services state)
  (gnu services)
  (ice-9 regex)
  (guix gexp)
  (d1024 services symlinks)
- (d1024 services stumpwm)
+ (d1024 services x11 stumpwm)
  (d1024 services emacs)
  (d1024 services shells)
  (d1024 services packages)
@@ -81,4 +83,9 @@
      emacs-services
      guix-services
      stumpwm-services
-     xinitrc-personal))))
+     xinitrc-personal
+     (list
+      (simple-service 'home-state
+		      home-state-service-type
+		      (list
+		       (state-git ".systems/d1024" "git@github.com:delta1024/d1024.git" ))))))))

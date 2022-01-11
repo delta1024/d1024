@@ -1,4 +1,4 @@
-(define-module (d1024 services redshift)
+(define-module (d1024 services x11 redshift)
   #:use-module (gnu services)
   #:use-module (guix gexp)
   #:use-module (gnu services shepherd)

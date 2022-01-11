@@ -7,7 +7,7 @@
   #:use-module (gnu packages xdisorg)
   #:use-module (gnu home)
   #:use-module (gnu home services)
-  #:use-module (d1024 services redshift)
+  #:use-module (d1024 services x11 redshift)
   #:use-module (gnu home services shepherd)
   #:use-module (guix gexp))
 

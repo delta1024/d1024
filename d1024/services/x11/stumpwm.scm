@@ -1,4 +1,4 @@
-(define-module (d1024 services stumpwm)
+(define-module (d1024 services x11 stumpwm)
   #:use-module (gnu home)
   #:use-module (gnu home services)
   #:use-module (gnu home-services-utils)
