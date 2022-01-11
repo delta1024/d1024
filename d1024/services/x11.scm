@@ -7,6 +7,7 @@
   #:use-module (gnu packages xdisorg)
   #:use-module (gnu home)
   #:use-module (gnu home services)
+  #:use-module (d1024 services redshift)
   #:use-module (gnu home services shepherd)
   #:use-module (guix gexp))
 
@@ -39,29 +40,7 @@ keycode  22 = Tab ISO_Left_Tab Tab ISO_Left_Tab"))
 
 ;;;;;;;;;;;;;;;;Redshift;;;;;;;;;;;;;;;;;;;;;;;
 
-(define redshift-conf
-  (local-file (string-append (getenv "HOME") "/.system/d1024/d1024/files/xapps/redshift.conf")))
 
-(define redshift-shepherd
-  (shepherd-service
-   (documentation "runs redshift to conftrol bluelight levels")
-   (provision '(redshift))
-   (start #~(make-forkexec-constructor
-	     (list #$(file-append redshift "/bin/redshift"))))
-   (stop #~(make-kill-destructor))))
-
-(define-public redshift-services
-  (list
-   (simple-service 'redshift-file
-		   home-files-service-type
-		   (list
-		    `("config/redshift.conf"
-		      ,redshift-conf)))
-   (simple-service 'redshift-service
-		   home-shepherd-service-type
-		   (list
-		    redshift-shepherd))))
-;;;;;;;;;;;;;;;;;xclip;;;;;;;;;;;;;;;;;
 (define xclip-shepherd
   (shepherd-service
    (documentation "runs xclip in the background")

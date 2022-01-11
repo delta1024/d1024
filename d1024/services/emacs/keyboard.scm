@@ -50,7 +50,7 @@
      "h s" '((lambda () (interactive)
 		     (dired "~/.system/d1024/d1024/systems"))
              :wk "system configuration")
-     "h S" '((lambda () (interactive)
+     "h h" '((lambda () (interactive)
 		     (dired "~/.system/d1024/d1024/services"))
 	     :wk "home services")
      "h d" '((lambda () (interactive)
