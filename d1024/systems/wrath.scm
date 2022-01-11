@@ -78,14 +78,14 @@
               wrath-packages))		
    (services
     (append
+     (list
+      (simple-service 'home-state
+		      home-state-service-type
+		      (list
+		       (state-git ".systems/d1024" "git@github.com:delta1024/d1024.git" ))))
      sym-services
      shell-services
      emacs-services
      guix-services
      stumpwm-services
-     xinitrc-personal
-     (list
-      (simple-service 'home-state
-		      home-state-service-type
-		      (list
-		       (state-git ".systems/d1024" "git@github.com:delta1024/d1024.git" ))))))))
+     xinitrc-personal))))
