@@ -8,6 +8,7 @@
   #:use-module (gnu home)
   #:use-module (gnu home services)
   #:use-module (d1024 services x11 redshift)
+  #:use-module (d1024 services x11 polybar)
   #:use-module (gnu home services shepherd)
   #:use-module (guix gexp))
 
@@ -56,32 +57,6 @@ keycode  22 = Tab ISO_Left_Tab Tab ISO_Left_Tab"))
 		   (list
 		    xclip-shepherd))))
 
-;;;;;;;;;;;;;;;polybar;;;;;;;;;;;;;;;;;;
-(define polybar-shepherd
-  (shepherd-service
-   (documentation "runs polybar in background")
-   (provision '(polybar))
-   (start #~(make-forkexec-constructor
-	      (list #$(file-append polybar "/bin/polybar")
-		    "panel")))
-   (stop #~(make-kill-destructor))))
-
-(define polybar-conf
-  (local-file (string-append
-	       (getenv "HOME")
-	       "/.system/d1024/d1024/files/xapps/polybar.config")))
-
-(define-public polybar-services
-  (list
-   (simple-service 'polybar-conf-file
-		   home-files-service-type
-		   (list
-		    `("config/polybar/config"
-		      ,polybar-conf)))
-   (simple-service 'polybar-service
-		   home-shepherd-service-type
-		   (list
-		    polybar-shepherd))))
 ;;;;;;;;;;;;;;;;;;;;;;;picom;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define picom-conf
   (local-file (string-append

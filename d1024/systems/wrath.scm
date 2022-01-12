@@ -57,6 +57,7 @@
  (d1024 services x11 stumpwm)
  (d1024 services emacs)
  (d1024 services shells)
+ (d1024 services x11 polybar)
  (d1024 services packages)
  (d1024 services x11))
 
