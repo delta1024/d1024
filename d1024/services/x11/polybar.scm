@@ -121,17 +121,17 @@
 	 ("tray-maxsize" . "28")
 
 	 ("cursor-click" . "pointer")
-	 ("cursor-scroll" . "ns-resize")
-	 ("# modules-left" . "exwm-workspace"))))
+	 ("cursor-scroll" . "ns-resize"))))
+	 ;; ("# modules-left" . "exwm-workspace"))))
 
-     (polybar-module
-      (name "module/exwm-workspace")
-      (args
-       '(("type" . "custom/ipc")
-	 ("hook-0" . "emacsclient -e \"exwm-workspace-current-index\" | sed -e 's/^\"//' -e 's/\"$//'")
-	 ("initial" . "1")
-	 ("format-underline" . "${colors.underline-1}")
-	 ("format-padding" . "\" \""))))
+     ;; (polybar-module
+     ;;  (name "module/exwm-workspace")
+     ;;  (args
+     ;;   '(("type" . "custom/ipc")
+     ;; 	 ("hook-0" . "emacsclient -e \"exwm-workspace-current-index\" | sed -e 's/^\"//' -e 's/\"$//'")
+     ;; 	 ("initial" . "1")
+     ;; 	 ("format-underline" . "${colors.underline-1}")
+     ;; 	 ("format-padding" . "\" \""))))
 
      (polybar-module
       (name "module/cpu")
