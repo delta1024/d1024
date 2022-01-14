@@ -42,19 +42,17 @@
 (define-maybe list)
 
 ;; Windows
-(define (window-serialize-maybe-pair field-name pair)
-  (define (process-pair value)
-    (string-append (string-pad "" 4) "x: " (number->string (car value)) "\n"
-		   (string-pad "" 4) "y: " (number->string (cdr value)) "\n"))
-  (if (is-disabled? pair)
+(define (window-serialize-maybe-pair field-name value)
+  (if (is-disabled? value)
       #~(string-append #$(empty-serializer field-name value))
       #~(string-append "  " #$(prettify-symbol field-name) ":\n"
-		       #$(process-pair pair))))
+		       #$(string-pad "" 4) "x: " #$(number->string (car value)) "\n"
+		       #$(string-pad "" 4) "y: " #$(number->string (cdr value)) "\n")))
 
 (define (window-dimensions-serialize-pair field-name value)
   (if (is-disabled? value)
       #~(string-append #$(empty-serializer field-name value))
-      #~(string-append " " #$(prettify-symbol field-name) ":\n"
+      #~(string-append "  " #$(prettify-symbol field-name) ":\n"
 		       #$(string-pad "" 4) "columns: "
 		       #$(number->string (car value)) "\n"
 		       #$(string-pad "" 4) "lines: "
@@ -66,7 +64,7 @@
       #~(string-append "  " #$(prettify-symbol field-name) ":\n"
 		       #$(string-pad "" 4) "instance: "
 		       #$(car value) "\n"
-		       #$(string-pad "" 4)"general: "
+		       #$(string-pad "" 4) "general: "
 		       #$(cdr value) "\n")))
 
 (define (window-serialize-maybe-bool field-name value)
@@ -81,7 +79,7 @@
 		       #$value "\n")))
 
 (define (window-scrolling-serialize-pair field-name value)
-  #~(string-append "  " #$(prettify-symbol field-name) "\n"
+  #~(string-append "  " #$(prettify-symbol field-name) ":\n"
 		   #$(string-pad "" 4) "history: "
 		   #$(number->string (car value)) "\n"
 		   #$(string-pad "" 4) "multiplyer: "
@@ -199,77 +197,136 @@ code@{startup_mode: Windowed}")
   (prefix window-))
 
 ;; # Font configuration
+(define-maybe list-of-font-configurations)
+(define list-of-font-configurations? list?)
+
+(define (serialize-list-of-font-configurations field-name configuration)
+  (if (is-disabled? configuration)
+      #~(string-append #$(empty-serializer field-name configuration))
+      #~(string-append "font:\n" #$@(map (cut serialize-configuration <>
+					      font-configuration-fields)
+					 configuration))))
+
+(define (font-serialize-maybe-pair field-name value)
+  (if (is-disabled? value)
+      #~(string-append #$(empty-serializer field-name value))
+      #~(string-append "  " #$(prettify-symbol field-name) ":\n"
+		       #$(string-pad "" 4) "family: " #$(car value) "\n"
+		       #$(string-pad "" 4) "syle: " #$(cdr value) "\n")))
+
+(define (font-serialize-xy-pair field-name value)
+  (if (is-disabled? value)
+      #~(string-append #$(empty-serializer field-name value))
+      #~(string-append "  " #$(prettify-symbol field-name) ":\n"
+		       #$(string-pad "" 4) "x: " #$(number->string (car value)) "\n"
+		       #$(string-pad "" 4) "y: " #$(number->string (cdr value)) "\n")))
+
+(define-maybe integer)
+
+(define (font-serialize-maybe-integer field-name value)
+  (if (is-disabled? value)
+      #~(string-append #$(empty-serializer field-name value))
+      #~(string-append "  " #$(symbol->string field-name) ": "
+		       #$(number->string value) "\n")))
+
+(define (font-serialize-maybe-bool field-name value)
+  (if (is-disabled? value)
+      #~(string-append #$(empty-serializer field-name value))
+      #~(string-append "  " #$(serialize-bool (prettify-symbol field-name) value)))) ;;": "
+		       ;; #$(serialize-bool 'use_thin_strokes value))))
+
+  
+(define-configuration font-configuration
 ;; font:
 ;;   # Normal (roman) font face
-;;   normal:
-;;     # Font family
-;;     #
-;;     # Default:
-;;     #   - (macOS) Menlo
-;;     #   - (Linux/BSD) monospace
-;;     #   - (Windows) Consolas
-;;     family: Fira Code
+  (normal
+   (maybe-pair 'disabled)
+  " normal:
+      Font family
+     
+      Default:
+        - (macOS) Menlo
+        - (Linux/BSD) monospace
+        - (Windows) Consolas
+     family: Fira Code
 
-;;     # The `style` can be specified to pick a specific face.
-;;     style: Regular
+     The `style` can be specified to pick a specific face.
+     style: Regular")
+  (bold
+   (maybe-pair 'disabled)
+" Bold font face
+bold:
+ # Font family
+ #
+ # If the bold family is not specified, it will fall back to the
+ # value specified for the normal font.
+ #family: monospace
 
-;;   # Bold font face
-;;   #bold:
-;;     # Font family
-;;     #
-;;     # If the bold family is not specified, it will fall back to the
-;;     # value specified for the normal font.
-;;     #family: monospace
+ # The `style` can be specified to pick a specific face.
+ #style: Bold")
+  (italic
+   (maybe-pair 'disabled)
+" Italic font face
+italic:
+ # Font family
+ #
+ # If the italic family is not specified, it will fall back to the
+ # value specified for the normal font.
+ #family: monospace
 
-;;     # The `style` can be specified to pick a specific face.
-;;     #style: Bold
+ # The `style` can be specified to pick a specific face.
+ #style: Italic")
+  (bold_italic
+   (maybe-pair 'disabled)
+" Bold italic font face
+bold_italic:
+ # Font family
+ #
+ # If the bold italic family is not specified, it will fall back to the
+ # value specified for the normal font.
+ #family: monospace
 
-;;   # Italic font face
-;;   #italic:
-;;     # Font family
-;;     #
-;;     # If the italic family is not specified, it will fall back to the
-;;     # value specified for the normal font.
-;;     #family: monospace
+ # The `style` can be specified to pick a specific face.
+ #style: Bold Italic")
 
-;;     # The `style` can be specified to pick a specific face.
-;;     #style: Italic
+  (size
+   (maybe-integer 'disabled)
+   "# Point size
+      size: 12.0")
 
-;;   # Bold italic font face
-;;   #bold_italic:
-;;     # Font family
-;;     #
-;;     # If the bold italic family is not specified, it will fall back to the
-;;     # value specified for the normal font.
-;;     #family: monospace
+  (offset
+   (maybe-pair 'disabled)
+"# Offset is the extra space around each character. `offset.y` can be thought of
+# as modifying the line spacing, and `offset.x` as modifying the letter spacing.
+#offset:
+#  x: 0
+#  y: 0"
+   font-serialize-xy-pair)
 
-;;     # The `style` can be specified to pick a specific face.
-;;     #style: Bold Italic
+  (glyph_offset
+   (maybe-pair 'disabled)
+"# Glyph offset determines the locations of the glyphs within their cells with
+# the default being at the bottom. Increasing `x` moves the glyph to the right,
+# increasing `y` moves the glyph upward.
+#glyph_offset:
+#  x: 0
+#  y: 0"
+   font-serialize-xy-pair)
 
-;;   # Point size
-;;   size: 12.0
+  (use_thin_strokes
+   (maybe-bool 'disabled)
+   " Thin stroke font rendering (macOS only)
 
-;;   # Offset is the extra space around each character. `offset.y` can be thought of
-;;   # as modifying the line spacing, and `offset.x` as modifying the letter spacing.
-;;   #offset:
-;;   #  x: 0
-;;   #  y: 0
+ Thin strokes are suitable for retina displays, but for non-retina screens
+ it is recommended to set `use_thin_strokes` to `false`.
+use_thin_strokes: true")
 
-;;   # Glyph offset determines the locations of the glyphs within their cells with
-;;   # the default being at the bottom. Increasing `x` moves the glyph to the right,
-;;   # increasing `y` moves the glyph upward.
-;;   #glyph_offset:
-;;   #  x: 0
-;;   #  y: 0
+  (draw_bold_text_with_bright_colors
+   (maybe-bool 'disabled)
+"If `true`, bold text is drawn using the bright color variants.
+draw_bold_text_with_bright_colors: false")
 
-;;   # Thin stroke font rendering (macOS only)
-;;   #
-;;   # Thin strokes are suitable for retina displays, but for non-retina screens
-;;   # it is recommended to set `use_thin_strokes` to `false`.
-;;   #use_thin_strokes: true
-
-;; # If `true`, bold text is drawn using the bright color variants.
-;; #draw_bold_text_with_bright_colors: false
+  (prefix font-))
 
 ;; # Colors (Tomorrow Night)
 ;; #colors:
@@ -826,7 +883,7 @@ code@{startup_mode: Windowed}")
   ;; #env:
   (env
    (maybe-list 'disabled)
-   "TERM variable
+   "TERM variab
  This value is used to set the `$TERM` environment variable for
  each instance of Alacritty. If it is not present, alacritty will
  check the local terminfo database and use `alacritty` if it is
@@ -836,7 +893,10 @@ code@{startup_mode: Windowed}")
    serialize-env)
   (window
    (maybe-list-of-alacritty-windows 'disabled)
-   "Alacritty window config (requires restart on change)"))
+   "Alacritty window config (requires restart on change)")
+  (font-config
+   (maybe-list-of-font-configurations 'disabled)
+   "Font configuration for Alacritty"))
 
 (define alacritty-config
   (alacritty-configuration
@@ -846,16 +906,25 @@ code@{startup_mode: Windowed}")
    (window
     (list
      (alacritty-window
-       (dimensions '(0 . 0))
-       (position '(0 . 0))
-       (padding '(0 . 0))
-       (dynamic_padding #f)
-       (decorations "full")
-       (startup_mode "Windowed")
-       (title "Alacritty")
-       (class '("Alacritty" . "Alacritty"))
-       (gtk_theme_variant "None")
-       (scrolling '(1000 . 0)))))
+      (dimensions '(0 . 0))
+      (position '(0 . 0))
+      (padding '(0 . 0))
+      (dynamic_padding #f)
+      (decorations "full")
+      (startup_mode "Windowed")
+      (title "Alacritty")
+      (class '("Alacritty" . "Alacritty"))
+      (gtk_theme_variant "None")
+      (scrolling '(1000 . 0)))))
+   (font-config				;; keep
+    (list				;; keep
+     (font-configuration 		;; keep
+      (normal '("Fira Code" . "Regular")) ;; keep
+      (size 12.0) 
+      (glyph_offset '(0 . 0))
+      (use_thin_strokes #t)
+      (draw_bold_text_with_bright_colors #f)
+      )))
    ))
 
 (define test-alacritty-service
