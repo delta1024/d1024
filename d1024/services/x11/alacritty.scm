@@ -12,6 +12,8 @@
 
   #:export (test-alacritty-service))
 
+;; TODO:
+;;      * finish refactor of serialize-xy-pair
 ;; Configuration for Alacritty, the GPU enhanced terminal emulator.
 (define (is-disabled? symbol)
   (match symbol
@@ -25,7 +27,8 @@
   (let ((return-value (match value
 			(#f "false")
 			(#t "true"))))
-    #~(string-append #$field-name ": " #$return-value "\n")))
+    #~(string-append #$(symbol->string field-name) ": " #$return-value "\n")))
+
 ;; Env
 (define (serialize-env-elm value)
   (define (serialize-pair pair)
@@ -43,11 +46,14 @@
 
 ;; Windows
 (define (window-serialize-maybe-pair field-name value)
+  (define (serialize-xy-pair field-name value)
+    (string-append "  " (prettify-symbol field-name) ":\n"
+		       (string-pad "" 4) "x: " (number->string (car value)) "\n"
+		       (string-pad "" 4) "y: " (number->string (cdr value)) "\n"))
   (if (is-disabled? value)
       #~(string-append #$(empty-serializer field-name value))
-      #~(string-append "  " #$(prettify-symbol field-name) ":\n"
-		       #$(string-pad "" 4) "x: " #$(number->string (car value)) "\n"
-		       #$(string-pad "" 4) "y: " #$(number->string (cdr value)) "\n")))
+      (let ((pair (serialize-xy-pair field-name value)))
+      #~(string-append #$pair))))
 
 (define (window-dimensions-serialize-pair field-name value)
   (if (is-disabled? value)
@@ -70,7 +76,7 @@
 (define (window-serialize-maybe-bool field-name value)
   (if (is-disabled? value)
       #~(string-append #$(empty-serializer field-name value))
-      #~(string-append "  " #$(serialize-bool (prettify-symbol field-name) value))))
+      #~(string-append "  " #$(serialize-bool field-name value))))
 
 (define (window-serialize-maybe-string field-name value)
   (if (is-disabled? value)
@@ -215,11 +221,14 @@ code@{startup_mode: Windowed}")
 		       #$(string-pad "" 4) "syle: " #$(cdr value) "\n")))
 
 (define (font-serialize-xy-pair field-name value)
+  (define (serialize-pair value)
+    (string-append "  " (prettify-symbol field-name) ":\n"
+		   (string-pad "" 4) "x: " (number->string (car value)) "\n"
+		   (string-pad "" 4) "y: " (number->string (cdr value)) "\n"))
   (if (is-disabled? value)
       #~(string-append #$(empty-serializer field-name value))
-      #~(string-append "  " #$(prettify-symbol field-name) ":\n"
-		       #$(string-pad "" 4) "x: " #$(number->string (car value)) "\n"
-		       #$(string-pad "" 4) "y: " #$(number->string (cdr value)) "\n")))
+      (let ((value (serialize-pair  value)))
+	#~(string-append #$value))))
 
 (define-maybe integer)
 
@@ -232,8 +241,7 @@ code@{startup_mode: Windowed}")
 (define (font-serialize-maybe-bool field-name value)
   (if (is-disabled? value)
       #~(string-append #$(empty-serializer field-name value))
-      #~(string-append "  " #$(serialize-bool (prettify-symbol field-name) value)))) ;;": "
-		       ;; #$(serialize-bool 'use_thin_strokes value))))
+      #~(string-append "  " #$(serialize-bool field-name value)))) ;;": "
 
   
 (define-configuration font-configuration
@@ -328,101 +336,243 @@ draw_bold_text_with_bright_colors: false")
 
   (prefix font-))
 
+(define list-of-color-groups? list?)
+
+(define (colors-serialize-list-of-color-groups field-name configuration)
+  (if (null? configuration)
+      #~(string-append #$(empty-serializer field-name configuration))
+      #~(string-append "  " #$(prettify-symbol field-name) ": \n"
+		       #$@(map (cut serialize-configuration <>
+					      color-groups-fields)
+					 configuration))))
+
+(define (color-groups-serialize-maybe-string field-name value)
+  (if (is-disabled? value)
+      #~(string-append #$(empty-serializer field-name value))
+      #~(string-append (string-pad "" 4) #$(prettify-symbol field-name) ": '" #$value "'\n"))) 
+
+
+(define-configuration color-groups
+  (black
+   (maybe-string 'disabled)
+   "the black value for the color group")
+  (red
+   (maybe-string 'disabled)
+   "the red value for the color group")
+  (green
+   (maybe-string 'disabled)
+   "the green value for the color group")
+  (yellow
+   (maybe-string 'disabled)
+   "the yellow value for the color group")
+  (blue
+   (maybe-string 'disabled)
+   "the blue value for the color group")
+  (magenta
+   (maybe-string 'disabled)
+   "the magenta value for the color group")
+  (cyan
+   (maybe-string 'disabled)
+   "the cyan value for the color group")
+  (white
+   (maybe-string 'disabled)
+   "the white value for the color group")
+  (prefix color-groups-))
+
+
+(define (serialize-list-of-color-configurations field-name configuration)
+  (if (is-disabled? configuration)
+      #~(string-append #$(empty-serializer field-name configuration))
+      #~(string-append "colors:\n" #$@(map (cut serialize-configuration <>
+						color-configuration-fields)
+					   configuration))))
+(define (colors-serialize-primary-list field-name value)
+  ;;TODO add guard to pre
+  (if (is-disabled? value)
+      #~(string-append #$(empty-serializer field-name value))
+      (let ((background (list-ref value 0))
+	    (foreground (list-ref value 1))
+	    (dim-foreground (list-ref value 2))
+	    (bright-foreground (list-ref value 3)))
+	#~(string-append  "  primary:\n"
+			 #$(if (string-null? background)
+			       ""
+			       (string-append (string-pad "" 4)
+					      "background: '" background "'\n"))
+			 #$(if (string-null? foreground)
+			       ""
+			       (string-append (string-pad "" 4)
+					      "foreground: '" foreground "'\n"))
+			 #$(if (string-null? dim-foreground)
+			       ""
+			       (string-append (string-pad "" 4)
+					      "dim_foreground: '" dim-foreground "'\n"))
+			 #$(if (string-null? bright-foreground)
+			       ""
+			       (string-append (string-pad "" 4)
+					      "bright_foreground: '" bright-foreground "'\n"))))))
+
+(define (colors-serialize-cursor-pair field-name value)
+  (if (is-disabled? value)
+      #~(string-append #$(empty-serializer field-name value))
+      #~(string-append "  " #$(symbol->string field-name) ":\n"
+		       #$(string-pad "" 4) "text: " #$(car value) "\n"
+		       #$(string-pad "" 4) "cursor: " #$(cdr value) "\n")))
+
+(define (colors-serialize-selection-pair field-name value)
+  (if (is-disabled? value)
+      #~(string-append #$(empty-serializer (symbol->string field-name) value))
+      #~(string-append "  " #$(symbol->string field-name) ":\n"
+		       #$(string-pad "" 4) "text: "
+		       #$(car value) "\n"
+		       #$(string-pad "" 4) "background: "
+		       #$(cdr value) "\n")))
+
+(define (colors-serialize-search-list field-name value)
+  (if (is-disabled? value)
+      #~(string-append #$(empty-serializer field-name value))
+      (let ((foreground (list-ref value 0))
+	    (background (list-ref value 1))
+	    (bar-foreground (list-ref value 2))
+	    (bar-background (list-ref value 3)))
+	#~(string-append "  " #$(symbol->string field-name) ":\n"
+			 #$(if (and (string-null? foreground) (string-null? background))
+			       ""
+			       (string-append (string-pad "" 4) "matches:\n"))
+			 #$(if (string-null? foreground)
+			       ""
+			       (string-append (string-pad "" 6)
+					      "foreground: '" foreground "'\n"))
+			 #$(if (string-null? foreground)
+			       ""
+			       (string-append (string-pad "" 6)
+					      "background: '" background "'\n"))
+			 #$(if (and (string-null? bar-foreground) (string-null? bar-background))
+			       ""
+			       (string-append (string-pad "" 4) "bar:\n"))
+			 #$(if (string-null? bar-foreground)
+			       ""
+			       (string-append (string-pad "" 6) "foreground: '" bar-foreground "'\n"))
+			 #$(if (string-null? bar-background)
+			       ""
+			       (string-append (string-pad "" 6) "background: '" bar-background "'\n"))))))
+					      
+
+;; (define (colors-serialize-indexed-colors-lists))
+
+(define-configuration color-configuration
 ;; # Colors (Tomorrow Night)
 ;; #colors:
-;;   # Default colors
-;;   #primary:
-;;   #  background: '#1d1f21'
-;;   #  foreground: '#c5c8c6'
+  (primary-colors
+   (maybe-list 'disabled)
+  "# Default colors
+  #primary:
+  #  background: '#1d1f21'
+  #  foreground: '#c5c8c6'
 
-;;     # Bright and dim foreground colors
-;;     #
-;;     # The dimmed foreground color is calculated automatically if it is not present.
-;;     # If the bright foreground color is not set, or `draw_bold_text_with_bright_colors`
-;;     # is `false`, the normal foreground color will be used.
-;;     #dim_foreground: '#828482'
-;;     #bright_foreground: '#eaeaea'
+    # Bright and dim foreground colors
+    #
+    # The dimmed foreground color is calculated automatically if it is not present.
+    # If the bright foreground color is not set, or `draw_bold_text_with_bright_colors`
+    # is `false`, the normal foreground color will be used.
+    #dim_foreground: '#828482'
+    #bright_foreground: '#eaeaea'"
+colors-serialize-primary-list)
 
-;;   # Cursor colors
-;;   #
-;;   # Colors which should be used to draw the terminal cursor.
-;;   #
-;;   # Allowed values are CellForeground and CellBackground, which reference the
-;;   # affected cell, or hexadecimal colors like #ff00ff.
-;;   #cursor:
-;;   #  text: CellBackground
-;;   #  cursor: CellForeground
+  (cursor
+   (maybe-pair 'disabled)
+   " Cursor colors
 
-;;   # Vi mode cursor colors
-;;   #
-;;   # Colors for the cursor when the vi mode is active.
-;;   #
-;;   # Allowed values are CellForeground and CellBackground, which reference the
-;;   # affected cell, or hexadecimal colors like #ff00ff.
-;;   #vi_mode_cursor:
-;;   #  text: CellBackground
-;;   #  cursor: CellForeground
+ Colors which should be used to draw the terminal cursor.
 
-;;   # Selection colors
-;;   #
-;;   # Colors which should be used to draw the selection area.
-;;   #
-;;   # Allowed values are CellForeground and CellBackground, which reference the
-;;   # affected cell, or hexadecimal colors like #ff00ff.
-;;   #selection:
-;;   #  text: CellBackground
-;;   #  background: CellForeground
+ Allowed values are CellForeground and CellBackground, which reference the
+ affected cell, or hexadecimal colors like #ff00ff.
+cursor:
+  text: CellBackground
+  cursor: CellForeground"
+   colors-serialize-cursor-pair)
 
-;;   # Search colors
-;;   #
-;;   # Colors used for the search bar and match highlighting.
-;;   #
-;;   # Allowed values are CellForeground and CellBackground, which reference the
-;;   # affected cell, or hexadecimal colors like #ff00ff.
-;;   #search:
-;;   #  matches:
-;;   #    foreground: '#000000'
-;;   #    background: '#ffffff'
-;;   #
-;;   #  bar:
-;;   #    background: CellForeground
-;;   #    foreground: CellBackground
+  (vi_mode_cursor
+   (maybe-pair 'disabled)
+   "Vi mode cursor colors
 
-;;   # Normal colors
-;;   #normal:
-;;   #  black:   '#1d1f21'
-;;   #  red:     '#cc6666'
-;;   #  green:   '#b5bd68'
-;;   #  yellow:  '#f0c674'
-;;   #  blue:    '#81a2be'
-;;   #  magenta: '#b294bb'
-;;   #  cyan:    '#8abeb7'
-;;   #  white:   '#c5c8c6'
+ Colors for the cursor when the vi mode is active.
 
-;;   # Bright colors
-;;   #bright:
-;;   #  black:   '#666666'
-;;   #  red:     '#d54e53'
-;;   #  green:   '#b9ca4a'
-;;   #  yellow:  '#e7c547'
-;;   #  blue:    '#7aa6da'
-;;   #  magenta: '#c397d8'
-;;   #  cyan:    '#70c0b1'
-;;   #  white:   '#eaeaea'
+ Allowed values are CellForeground and CellBackground, which reference the
+ affected cell, or hexadecimal colors like #ff00ff.
+vi_mode_cursor:
+  text: CellBackground
+  cursor: CellForeground"
+   colors-serialize-cursor-pair)
+  (selection
+   (maybe-pair 'disabled)
+ "Selection colors
 
-;;   # Dim colors
-;;   #
-;;   # If the dim colors are not set, they will be calculated automatically based
-;;   # on the `normal` colors.
-;;   #dim:
-;;   #  black:   '#131415'
-;;   #  red:     '#864343'
-;;   #  green:   '#777c44'
-;;   #  yellow:  '#9e824c'
-;;   #  blue:    '#556a7d'
-;;   #  magenta: '#75617b'
-;;   #  cyan:    '#5b7d78'
-;;   #  white:   '#828482'
+ Colors which should be used to draw the selection area.
+
+ Allowed values are CellForeground and CellBackground, which reference the
+ affected cell, or hexadecimal colors like #ff00ff.
+selection:
+  text: CellBackground
+  background: CellForeground"
+ colors-serialize-selection-pair)
+  (search
+   (maybe-list 'disabled)
+ "Search colors
+
+ Colors used for the search bar and match highlighting.
+
+ Allowed values are CellForeground and CellBackground, which reference the
+ affected cell, or hexadecimal colors like #ff00ff.
+search:
+  matches:
+    foreground: '#000000'
+    background: '#ffffff'
+
+  bar:
+    background: CellForeground
+    foreground: CellBackground"
+ colors-serialize-search-list)
+  (normal
+   (list-of-color-groups '())
+" Normal colors
+normal:
+  black:   '#1d1f21'
+  red:     '#cc6666'
+  green:   '#b5bd68'
+  yellow:  '#f0c674'
+  blue:    '#81a2be'
+  magenta: '#b294bb'
+  cyan:    '#8abeb7'
+  white:   '#c5c8c6'")
+  (bright
+   (list-of-color-groups '())
+" Bright colors
+bright:
+  black:   '#666666'
+  red:     '#d54e53'
+  green:   '#b9ca4a'
+  yellow:  '#e7c547'
+  blue:    '#7aa6da'
+  magenta: '#c397d8'
+  cyan:    '#70c0b1'
+  white:   '#eaeaea'")
+  (dim
+   (list-of-color-groups '())
+" Dim colors
+
+ If the dim colors are not set, they will be calculated automatically based
+ on the `normal` colors.
+dim:
+  black:   '#131415'
+  red:     '#864343'
+  green:   '#777c44'
+  yellow:  '#9e824c'
+  blue:    '#556a7d'
+  magenta: '#75617b'
+  cyan:    '#5b7d78'
+  white:   '#828482'")
+  (prefix colors-))
 
 ;;   # Indexed Colors
 ;;   #
@@ -873,8 +1023,11 @@ draw_bold_text_with_bright_colors: false")
    #~(string-append "# This file is generated by (d1024 services x11 alacritty)\n# please see commentary there\n"
 		    #$(serialize-configuration
 		       configuration alacritty-configuration-fields))))
+
 (define-maybe list-of-alacritty-windows)
 (define list-of-alacritty-windows? list?)
+(define-maybe list-of-color-configurations)
+(define list-of-color-configurations? list?)
 
 (define-configuration alacritty-configuration
   ;; # Any items in the `env` entry below will be added as
@@ -886,7 +1039,7 @@ draw_bold_text_with_bright_colors: false")
    "TERM variab
  This value is used to set the `$TERM` environment variable for
  each instance of Alacritty. If it is not present, alacritty will
- check the local terminfo database and use `alacritty` if it is
+
  available, otherwise `xterm-256color` is used.
 @code{env:
   TERM: alacritty}"
@@ -895,8 +1048,11 @@ draw_bold_text_with_bright_colors: false")
    (maybe-list-of-alacritty-windows 'disabled)
    "Alacritty window config (requires restart on change)")
   (font-config
-   (maybe-list-of-font-configurations 'disabled)
-   "Font configuration for Alacritty"))
+ (maybe-list-of-font-configurations 'disabled)
+ "Font configuration for Alacritty")
+  (color-config
+   (maybe-list-of-color-configurations 'disabled)
+   "color configuration field"))
 
 (define alacritty-config
   (alacritty-configuration
@@ -923,9 +1079,30 @@ draw_bold_text_with_bright_colors: false")
       (size 12.0) 
       (glyph_offset '(0 . 0))
       (use_thin_strokes #t)
-      (draw_bold_text_with_bright_colors #f)
-      )))
-   ))
+      (draw_bold_text_with_bright_colors #f))))
+   (color-config
+    (list
+     (color-configuration
+      (primary-colors '("" "#c5c8c6"
+			"#828482" "#eaeaea"))
+      (cursor '("CellBackground" . "CellForeground"))
+      (vi_mode_cursor '("CellBackground" . "CellForeground"))
+      (selection '("CellBackground" . "CellForeground"))
+      (search '("#000000" "#ffffff"
+		"CellForeground" "CellBackground"))
+      (normal
+       (list
+	(color-groups
+	 (black "#1d1f21")
+	 (red "#cc6666")
+	 (green "#b5bd68")
+	 (yellow "#f0c674")
+	 (blue "#81a2be")
+	 (magenta "#b294bb")
+	 (cyan "#8abeb7")
+	 (white "#c5c8c6")))))))
+      ));;)))
+   
 
 (define test-alacritty-service
   (list
