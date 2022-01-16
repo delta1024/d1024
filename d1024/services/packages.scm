@@ -47,7 +47,7 @@
 	lf
         zsh
         ispell
-	password-store
+;;	password-store
         pinentry
         zip
         unzip
