@@ -27,7 +27,12 @@
   #:use-module (gnu packages compression)
   #:use-module (nongnu packages mozilla)
   #:use-module (gnu packages vim)
-  #:use-module (gnu packages emacs))
+  #:use-module (guix inferior)
+  #:use-module (guix channels)
+  #:use-module (gnu packages emacs)
+
+  #:export (desktop-packages
+	    wrath-packages))
 
 (define large-packages
   (list
@@ -42,7 +47,7 @@
 	lf
         zsh
         ispell
-        password-store
+	password-store
         pinentry
         zip
         unzip
@@ -51,12 +56,12 @@
         fontconfig
         neovim))
 
-(define-public wrath-packages
+(define wrath-packages
   (append
    wrath-packages-base
    large-packages))
 
-(define-public desktop-packages
+(define desktop-packages
    (list dunst
 	 brightnessctl
 	 perl-file-mimeinfo

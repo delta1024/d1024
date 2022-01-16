@@ -44,7 +44,7 @@
 		       "emacs-projectile"
 		       "emacs-counsel-projectile"
 		       "emacs-magit"
-		       "emacs-pass"
+		       ;;"emacs-pass"
 		       "emacs-pinentry"
 		       "emacs-helpful"
 		       "emacs-doom-themes"
