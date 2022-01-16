@@ -58,8 +58,8 @@
 
 (define wrath-packages
   (append
-   wrath-packages-base
-   large-packages))
+   wrath-packages-base))
+   ;; large-packages))
 
 (define desktop-packages
    (list dunst
