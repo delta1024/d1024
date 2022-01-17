@@ -3,6 +3,8 @@
   #:use-module (gnu system mapped-devices)
   #:use-module (gnu)
   #:use-module (gnu system keyboard)
+  #:use-module (gnu services xorg)
+  #:use-module (gnu packages wm)
   #:use-module (gnu system mapped-devices)
   #:use-module (gnu home-services state)
   #:use-module (gnu system file-systems)
@@ -44,7 +46,7 @@
 		      ,channels)
 		    `("config/guix/channels.scm"
 		      ,channels)))))
-(define my-keyboard-layout
+(define %my-keyboard-layout
   (keyboard-layout "us" #:model "thinkpad"))
 
 (define mapped-devices
@@ -62,7 +64,7 @@
 (define wrath-system
   (set-fields full-default-system
    ((get-os system-host) "wrath")
-   ((get-os system-keyboard-layout) my-keyboard-layout)
+   ((get-os system-keyboard-layout) %my-keyboard-layout)
    ((get-os system-mapped-dev) mapped-devices)
    ((get-os system-file-system)
     (cons* (file-system
@@ -80,6 +82,17 @@
             (type "ext4")
             (dependencies mapped-devices))
            %base-file-systems))
+   ((get-os system-system-services)
+    (cons*
+     (service slim-service-type (slim-configuration
+                                 (auto-login? #t)
+                                 (default-user "jake")
+				 (auto-login-session
+				  (file-append stumpwm "/bin/stumpwm"))
+                                 (xorg-configuration
+                                  (xorg-configuration
+				   (keyboard-layout %my-keyboard-layout)))))
+     (system-system-services (get-os full-default-system))))
    ((get-os system-swap)
     (list
      (swap-space

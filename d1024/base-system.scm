@@ -149,22 +149,13 @@
           (specification->package "zsh")
 	  ;; (specification->package "flatpak")
           (specification->package "curl")
-          (specification->package "system-config-printer")
+          ;; (specification->package "system-config-printer")
           ;; (specification->package
           ;;  "emacs-desktop-environment")
           (specification->package "nss-certs"))
     %base-packages)
 
-   (cons* (service slim-service-type (slim-configuration
-                                      (auto-login? #t)
-                                      (default-user "jake")
-				      (auto-login-session
-				       (file-append stumpwm "/bin/stumpwm"))
-                                      (xorg-configuration
-                                       (xorg-configuration
-					(keyboard-layout my-keyboard)))))
-   
-	  ;; (service xfce-desktop-service-type)
+   (cons* ;; (service xfce-desktop-service-type)
 	  ;; (service cups-service-type)
           (service openssh-service-type)
           (service nix-service-type)
@@ -173,15 +164,16 @@
           (modify-services %my-desktop-services
                            (delete gdm-service-type)))))
 (define default-user
-  (user-config "placeholder" "placeholder"))
+  (user-config '() '()))
 
 (define full-default-system
   (full-system default-system default-user))
 
 
 (define (get-system-config config)
-  (let ((host (system-host (get-os config)))
-	(local (system-local (get-os config)))
+  (let* ((os-config (get-os config))
+	 (host (system-host os-config))
+	(local (system-local os-config))
 	(timezone (system-time-zone (get-os config)))
 	(kernel (system-kernel (get-os config)))
 	(firmware (system-firmware (get-os config)))
