@@ -65,9 +65,8 @@
 
 * Windows
 ** Serializers
-
+*** maybe-pair
 #+begin_src scheme
-;; Windows
 (define (window-serialize-maybe-pair field-name value)
   (define (serialize-xy-pair field-name value)
     (string-append "  " (prettify-symbol field-name) ":\n"
@@ -77,7 +76,10 @@
       #~(string-append #$(empty-serializer field-name value))
       (let ((pair (serialize-xy-pair field-name value)))
       #~(string-append #$pair))))
+#+end_src
 
+*** dimensions-pair
+#+begin_src scheme
 (define (window-dimensions-serialize-pair field-name value)
   (if (is-disabled? value)
       #~(string-append #$(empty-serializer field-name value))
@@ -86,7 +88,10 @@
 		       #$(number->string (car value)) "\n"
 		       #$(string-pad "" 4) "lines: "
 		       #$(number->string (cdr value)) "\n")))
+#+end_src
 
+*** class-pair
+#+begin_src scheme
 (define (window-class-serialize-pair field-name value)
   (if (is-disabled? value)
       #~(string-append #$(empty-serializer field-name value))
@@ -95,25 +100,37 @@
 		       #$(car value) "\n"
 		       #$(string-pad "" 4) "general: "
 		       #$(cdr value) "\n")))
+#+end_src
 
+*** maybe-bool
+#+begin_src scheme
 (define (window-serialize-maybe-bool field-name value)
   (if (is-disabled? value)
       #~(string-append #$(empty-serializer field-name value))
       #~(string-append "  " #$(serialize-bool field-name value))))
+#+end_src
 
+*** maybe-string
+#+begin_src scheme
 (define (window-serialize-maybe-string field-name value)
   (if (is-disabled? value)
       #~(string-append #$(empty-serializer field-name value))
       #~(string-append "  " #$(prettify-symbol field-name) ": "
 		       #$value "\n")))
+#+end_src
 
+*** scroling-pair
+#+begin_src scheme
 (define (window-scrolling-serialize-pair field-name value)
   #~(string-append "  " #$(prettify-symbol field-name) ":\n"
 		   #$(string-pad "" 4) "history: "
 		   #$(number->string (car value)) "\n"
 		   #$(string-pad "" 4) "multiplyer: "
 		   #$(number->string (cdr value)) "\n"))
+#+end_src
 
+*** list
+#+begin_src scheme
 (define (serialize-list-of-alacritty-windows field-name configuration)
   (if (is-disabled? configuration)
       #~(string-append #$(empty-serializer field-name configuration))
@@ -123,9 +140,13 @@
 #+end_src
 
 ** Configuration
-
+*** start config
 #+begin_src scheme
-(define-configuration alacritty-window
+ (define-configuration alacritty-window
+#+end_src
+
+**** dimensions
+#+begin_src scheme
   (dimensions
    (maybe-pair 'disabled)
    "Window dimensions (changes require restart)
@@ -136,6 +157,11 @@ dimensions:
      columns: 0
      lines: 0}"
    window-dimensions-serialize-pair)
+#+end_src
+
+**** position
+
+#+begin_src scheme
   (position
    (maybe-pair 'disabled)
   " Window position (changes require restart)
@@ -146,6 +172,11 @@ If the position is not set, the window manager will handle the placement.
 position:
   x: 0
   y: 0}")
+#+end_src
+
+**** padding
+
+#+begin_src scheme
   (padding
    (maybe-pair 'disabled)
    " Window padding (changes require restart)
@@ -155,11 +186,19 @@ position:
 @code{padding:
   x: 0
   y: 0}")
+#+end_src
+
+**** dynamic padding
+
+#+begin_src scheme
   (dynamic_padding
    (maybe-bool 'disabled)
    "Spread additional padding evenly around the terminal content.
 @code{dynamic_padding: false}")
+#+end_src
 
+**** decorations
+#+begin_src scheme
   (decorations
    (maybe-string 'disabled)
    " Window decorations
@@ -172,6 +211,10 @@ position:
       - transparent: Title bar, transparent background and title bar buttons
       - buttonless: Title bar, transparent background, but no title bar buttons
 @code{ decorations: full}")
+#+end_src
+
+**** startup mode
+#+begin_src scheme
   (startup_mode
    (maybe-string 'disabled)
 " Startup Mode (changes require restart)
@@ -184,12 +227,17 @@ position:
  Values for `startup_mode` (macOS only):
    - SimpleFullscreen
 code@{startup_mode: Windowed}")
+#+end_src
 
+**** title
+#+begin_src scheme
   (title
    (maybe-string 'disabled)
   " Window title
   title: Alacritty")
 
+#+end_src
+#+begin_src scheme
   (class
     (maybe-pair 'disabled)
     " # Window class (Linux/BSD only):
@@ -199,41 +247,53 @@ code@{startup_mode: Windowed}")
   General application class
 @code{  general: Alacritty}"
     window-class-serialize-pair)
+#+end_src
 
-  (gtk_theme_variant
-   (maybe-string 'disabled)
-" GTK theme variant (Linux/BSD only)
- Override the variant of the GTK theme. Commonly supported values are `dark` and `light`.
- Set this to `None` to use the default theme variant.
-  #@code{gtk_theme_variant: None}")
+**** gtk theme variant
+#+begin_src scheme
+    (gtk_theme_variant
+     (maybe-string 'disabled)
+  " GTK theme variant (Linux/BSD only)
+   Override the variant of the GTK theme. Commonly supported values are `dark` and `light`.
+   Set this to `None` to use the default theme variant.
+    #@code{gtk_theme_variant: None}")
+  
+      (scrolling
+       (maybe-pair 'disabled)
+       "scrolling:
+     Maximum number of lines in the scrollback buffer.
+     Specifying '0' will disable scrolling.
+    history: 10000
+  
+     Scrolling distance multiplier.
+    multiplier: 3"
+       window-scrolling-serialize-pair)
+#+end_src
 
-    (scrolling
-     (maybe-pair 'disabled)
-     "scrolling:
-   Maximum number of lines in the scrollback buffer.
-   Specifying '0' will disable scrolling.
-  history: 10000
-
-   Scrolling distance multiplier.
-  multiplier: 3"
-     window-scrolling-serialize-pair)
-  (prefix window-))
+*** end config
+#+begin_src scheme
+    (prefix window-))
 #+end_src
 
 * Font 
 ** Serializers
-
 #+begin_src scheme
 (define-maybe list-of-font-configurations)
 (define list-of-font-configurations? list?)
+#+end_src
 
+*** list
+#+begin_src scheme
 (define (serialize-list-of-font-configurations field-name configuration)
   (if (is-disabled? configuration)
       #~(string-append #$(empty-serializer field-name configuration))
       #~(string-append "font:\n" #$@(map (cut serialize-configuration <>
 					      font-configuration-fields)
 					 configuration))))
+#+end_src
 
+*** maybe pair
+#+begin_src scheme
 (define (font-serialize-maybe-pair field-name value)
   (if (is-disabled? value)
       #~(string-append #$(empty-serializer field-name value))
@@ -241,6 +301,10 @@ code@{startup_mode: Windowed}")
 		       #$(string-pad "" 4) "family: " #$(car value) "\n"
 		       #$(string-pad "" 4) "syle: " #$(cdr value) "\n")))
 
+#+end_src
+
+*** xy pair
+#+begin_src scheme
 (define (font-serialize-xy-pair field-name value)
   (define (serialize-pair value)
     (string-append "  " (prettify-symbol field-name) ":\n"
@@ -250,14 +314,19 @@ code@{startup_mode: Windowed}")
       #~(string-append #$(empty-serializer field-name value))
       (let ((value (serialize-pair  value)))
 	#~(string-append #$value))))
+#+end_src
 
-
+*** maybe integer
+#+begin_src scheme
 (define (font-serialize-maybe-integer field-name value)
   (if (is-disabled? value)
       #~(string-append #$(empty-serializer field-name value))
       #~(string-append "  " #$(symbol->string field-name) ": "
 		       #$(number->string value) "\n")))
+#+end_src
 
+*** maybe bool
+#+begin_src scheme
 (define (font-serialize-maybe-bool field-name value)
   (if (is-disabled? value)
       #~(string-append #$(empty-serializer field-name value))
@@ -265,9 +334,13 @@ code@{startup_mode: Windowed}")
 #+end_src
 
 ** Configuration 
-
+*** begin config
 #+begin_src scheme
 (define-configuration font-configuration
+#+end_src
+
+**** normal
+#+begin_src scheme
 ;; font:
 ;;   # Normal (roman) font face
   (normal
@@ -283,86 +356,119 @@ code@{startup_mode: Windowed}")
 
      The `style` can be specified to pick a specific face.
      style: Regular")
-  (bold
-   (maybe-pair 'disabled)
-" Bold font face
-bold:
- # Font family
- #
- # If the bold family is not specified, it will fall back to the
- # value specified for the normal font.
- #family: monospace
+#+end_src
 
- # The `style` can be specified to pick a specific face.
- #style: Bold")
-  (italic
-   (maybe-pair 'disabled)
-" Italic font face
-italic:
- # Font family
- #
- # If the italic family is not specified, it will fall back to the
- # value specified for the normal font.
- #family: monospace
+**** maybe pair
+#+begin_src scheme
+    (bold
+     (maybe-pair 'disabled)
+  " Bold font face
+  bold:
+   # Font family
+   #
+   # If the bold family is not specified, it will fall back to the
+   # value specified for the normal font.
+   #family: monospace
+  
+   # The `style` can be specified to pick a specific face.
+   #style: Bold")
+#+end_src
 
- # The `style` can be specified to pick a specific face.
- #style: Italic")
-  (bold_italic
-   (maybe-pair 'disabled)
-" Bold italic font face
-bold_italic:
- # Font family
- #
- # If the bold italic family is not specified, it will fall back to the
- # value specified for the normal font.
- #family: monospace
+**** italic
+#+begin_src scheme
+    (italic
+     (maybe-pair 'disabled)
+  " Italic font face
+  italic:
+   # Font family
+   #
+   # If the italic family is not specified, it will fall back to the
+   # value specified for the normal font.
+   #family: monospace
+  
+   # The `style` can be specified to pick a specific face.
+   #style: Italic")
+#+end_src
 
- # The `style` can be specified to pick a specific face.
- #style: Bold Italic")
+**** bold italic
+#+begin_src scheme
+    (bold_italic
+     (maybe-pair 'disabled)
+  " Bold italic font face
+  bold_italic:
+   # Font family
+   #
+   # If the bold italic family is not specified, it will fall back to the
+   # value specified for the normal font.
+   #family: monospace
+  
+   # The `style` can be specified to pick a specific face.
+   #style: Bold Italic")
+#+end_src
 
-  (size
-   (maybe-integer 'disabled)
-   "# Point size
-      size: 12.0")
+**** size
+#+begin_src scheme
+    (size
+     (maybe-integer 'disabled)
+     "# Point size
+        size: 12.0")
+  
+#+end_src
 
-  (offset
-   (maybe-pair 'disabled)
-"# Offset is the extra space around each character. `offset.y` can be thought of
-# as modifying the line spacing, and `offset.x` as modifying the letter spacing.
-#offset:
-#  x: 0
-#  y: 0"
-   font-serialize-xy-pair)
+**** offset
+#+begin_src scheme
+    (offset
+     (maybe-pair 'disabled)
+  "# Offset is the extra space around each character. `offset.y` can be thought of
+  # as modifying the line spacing, and `offset.x` as modifying the letter spacing.
+  #offset:
+  #  x: 0
+  #  y: 0"
+     font-serialize-xy-pair)
+  
+#+end_src
 
-  (glyph_offset
-   (maybe-pair 'disabled)
-"# Glyph offset determines the locations of the glyphs within their cells with
-# the default being at the bottom. Increasing `x` moves the glyph to the right,
-# increasing `y` moves the glyph upward.
-#glyph_offset:
-#  x: 0
-#  y: 0"
-   font-serialize-xy-pair)
+**** glyph offset
+#+begin_src scheme
+    (glyph_offset
+     (maybe-pair 'disabled)
+  "# Glyph offset determines the locations of the glyphs within their cells with
+  # the default being at the bottom. Increasing `x` moves the glyph to the right,
+  # increasing `y` moves the glyph upward.
+  #glyph_offset:
+  #  x: 0
+  #  y: 0"
+     font-serialize-xy-pair)
+#+end_src
 
-  (use_thin_strokes
-   (maybe-bool 'disabled)
-   " Thin stroke font rendering (macOS only)
+**** use thin strokes
+#+begin_src scheme
+    (use_thin_strokes
+     (maybe-bool 'disabled)
+     " Thin stroke font rendering (macOS only)
+  
+   Thin strokes are suitable for retina displays, but for non-retina screens
+   it is recommended to set `use_thin_strokes` to `false`.
+  use_thin_strokes: true")
+  
+#+end_src
 
- Thin strokes are suitable for retina displays, but for non-retina screens
- it is recommended to set `use_thin_strokes` to `false`.
-use_thin_strokes: true")
+**** draw bold text with bright colors
+#+begin_src scheme
+    (draw_bold_text_with_bright_colors
+     (maybe-bool 'disabled)
+  "If `true`, bold text is drawn using the bright color variants.
+  draw_bold_text_with_bright_colors: false")
+#+end_src
 
-  (draw_bold_text_with_bright_colors
-   (maybe-bool 'disabled)
-"If `true`, bold text is drawn using the bright color variants.
-draw_bold_text_with_bright_colors: false")
-
-  (prefix font-))
+*** end config
+#+begin_src scheme
+    (prefix font-))
 #+end_src
 
 * Colors
 ** Serializers
-
+*** Groups List
 #+begin_src scheme
   (define list-of-color-groups? list?)
   
@@ -373,17 +479,29 @@ draw_bold_text_with_bright_colors: false")
                          #$@(map (cut serialize-configuration <>
                                       color-groups-fields)
                                  configuration))))
+#+end_src
+
+*** Groups Maybe String
+#+begin_src scheme
   (define (color-groups-serialize-maybe-string field-name value)
     (if (is-disabled? value)
         #~(string-append #$(empty-serializer field-name value))
         #~(string-append (string-pad "" 4) #$(prettify-symbol field-name) ": '" #$value "'\n"))) 
   
+#+end_src
+
+*** Lists
+#+begin_src scheme
   (define (serialize-list-of-color-configurations field-name configuration)
     (if (is-disabled? configuration)
         #~(string-append #$(empty-serializer field-name configuration))
         #~(string-append "colors:\n" #$@(map (cut serialize-configuration <>
                                                   color-configuration-fields)
                                              configuration))))
+#+end_src
+
+*** Primary List
+#+begin_src scheme
   (define (colors-serialize-primary-list field-name value)
     ;;TODO add guard to pre
     (if (is-disabled? value)
@@ -409,14 +527,20 @@ draw_bold_text_with_bright_colors: false")
                                   ""
                                   (string-append (string-pad "" 4)
                                                  "bright_foreground: '" bright-foreground "'\n"))))))
-  
+#+end_src
+
+*** Cursor Pair
+#+begin_src scheme
   (define (colors-serialize-cursor-pair field-name value)
     (if (is-disabled? value)
         #~(string-append #$(empty-serializer field-name value))
         #~(string-append "  " #$(symbol->string field-name) ":\n"
                          #$(string-pad "" 4) "text: " #$(car value) "\n"
                          #$(string-pad "" 4) "cursor: " #$(cdr value) "\n")))
-  
+#+end_src
+
+*** Selection Pair
+#+begin_src scheme
   (define (colors-serialize-selection-pair field-name value)
     (if (is-disabled? value)
         #~(string-append #$(empty-serializer (symbol->string field-name) value))
@@ -425,7 +549,10 @@ draw_bold_text_with_bright_colors: false")
                          #$(car value) "\n"
                          #$(string-pad "" 4) "background: "
                          #$(cdr value) "\n")))
-  
+#+end_src
+
+*** Search List
+#+begin_src scheme
   (define (colors-serialize-search-list field-name value)
     (if (is-disabled? value)
         #~(string-append #$(empty-serializer field-name value))
@@ -454,8 +581,10 @@ draw_bold_text_with_bright_colors: false")
                            #$(if (string-null? bar-background)
                                  ""
                                  (string-append (string-pad "" 6) "background: '" bar-background "'\n"))))))
-  
-  
+#+end_src
+
+*** Indexed List
+#+begin_src scheme
   (define (colors-serialize-indexed-lists field-name value)
     (define (serialize-pair pair)
       (string-append (string-pad "" 4) "- { index: " (car pair) ", color: '" (cdr pair) "' }\n"))
@@ -467,6 +596,7 @@ draw_bold_text_with_bright_colors: false")
   #+end_src
 
 ** Configuration
+*** Color Groups
 #+begin_src scheme
   (define-configuration color-groups
     (black
@@ -494,10 +624,17 @@ draw_bold_text_with_bright_colors: false")
      (maybe-string 'disabled)
      "the white value for the color group")
     (prefix color-groups-))
-  
+#+end_src
+
+*** Begin Config
+#+begin_src scheme
   (define-configuration color-configuration
     ;; # Colors (Tomorrow Night)
     ;; #colors:
+#+end_src
+
+**** Primary Colors
+#+begin_src scheme
     (primary-colors
      (maybe-list 'disabled)
      "# Default colors
@@ -513,7 +650,10 @@ draw_bold_text_with_bright_colors: false")
         #dim_foreground: '#828482'
         #bright_foreground: '#eaeaea'"
      colors-serialize-primary-list)
-  
+#+end_src
+
+**** Cursor
+#+begin_src scheme
     (cursor
      (maybe-pair 'disabled)
      " Cursor colors
@@ -526,7 +666,10 @@ draw_bold_text_with_bright_colors: false")
       text: CellBackground
       cursor: CellForeground"
      colors-serialize-cursor-pair)
-  
+#+end_src
+
+**** Vi Mode Cursor
+#+begin_src scheme
     (vi_mode_cursor
      (maybe-pair 'disabled)
      "Vi mode cursor colors
@@ -539,6 +682,10 @@ draw_bold_text_with_bright_colors: false")
       text: CellBackground
       cursor: CellForeground"
      colors-serialize-cursor-pair)
+#+end_src
+
+**** Selection
+#+begin_src scheme
     (selection
      (maybe-pair 'disabled)
      "Selection colors
@@ -551,6 +698,10 @@ draw_bold_text_with_bright_colors: false")
       text: CellBackground
       background: CellForeground"
      colors-serialize-selection-pair)
+#+end_src
+
+**** Search
+#+begin_src scheme
     (search
      (maybe-list 'disabled)
      "Search colors
@@ -568,6 +719,10 @@ draw_bold_text_with_bright_colors: false")
         background: CellForeground
         foreground: CellBackground"
      colors-serialize-search-list)
+#+end_src
+
+**** Normal
+#+begin_src scheme
     (normal
      (list-of-color-groups '())
      " Normal colors
@@ -580,6 +735,10 @@ draw_bold_text_with_bright_colors: false")
       magenta: '#b294bb'
       cyan:    '#8abeb7'
       white:   '#c5c8c6'")
+#+end_src
+
+**** Bright
+#+begin_src scheme
     (bright
      (list-of-color-groups '())
      " Bright colors
@@ -592,6 +751,10 @@ draw_bold_text_with_bright_colors: false")
       magenta: '#c397d8'
       cyan:    '#70c0b1'
       white:   '#eaeaea'")
+#+end_src
+
+**** Dim
+#+begin_src scheme
     (dim
      (list-of-color-groups '())
      " Dim colors
@@ -607,6 +770,10 @@ draw_bold_text_with_bright_colors: false")
       magenta: '#75617b'
       cyan:    '#5b7d78'
       white:   '#828482'")
+#+end_src
+
+**** Indexed Colors
+#+begin_src scheme
     (indexed_colors
      (maybe-list 'disabled)
      "Indexed Colors
@@ -619,10 +786,15 @@ draw_bold_text_with_bright_colors: false")
   
   indexed_colors: []"
      colors-serialize-indexed-lists)
-    (prefix colors-))
-  #+end_src
+#+end_src
 
-* Todo
+*** End Config
+#+begin_src scheme
+    (prefix colors-))
+#+end_src
+
+
+* Bell
 ;; # Bell
 ;; #
 ;; # The bell is rung every time the BEL control character is received.
@@ -664,13 +836,14 @@ draw_bold_text_with_bright_colors: false")
 ;;   #
 ;;   #command: None
 
+* Background Opacity
 ;; # Background opacity
 ;; #
 ;; # Window opacity as a floating point number from `0.0` to `1.0`.
 ;; # The value `0.0` is completely transparent and `1.0` is opaque.
 ;; background_opacity: 0.8
 
-
+* Todo
 ;; #selection:
 ;;   #semantic_escape_chars: ",│`|:\"' ()[]{}<>\t"
 
@@ -1057,7 +1230,6 @@ draw_bold_text_with_bright_colors: false")
 ;;   print_events: true
 
 * Configuration
-
 #+begin_src scheme
   (define (serialize-alacritty-configuration configuration)
     (mixed-text-file
@@ -1096,6 +1268,7 @@ draw_bold_text_with_bright_colors: false")
      (maybe-list-of-color-configurations 'disabled)
      "color configuration field"))
 #+end_src
+
 ** Personal Config
 #+begin_src scheme
   (define alacritty-config

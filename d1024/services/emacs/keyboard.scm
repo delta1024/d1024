@@ -54,7 +54,7 @@
 		     (dired "~/.system/d1024/d1024/services"))
 	     :wk "home services")
      "h d" '((lambda () (interactive)
-		     (find-file (expand-file-name "stumpwm.scm" "~/.system/d1024/d1024/services")))
+		     (find-file (expand-file-name "stumpwm.scm" "~/.system/d1024/d1024/services/x11")))
              :wk "desktop configuration")
 
      "d"     '((lambda () (interactive) (dired "~/")) :wk "Dired home")
