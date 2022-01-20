@@ -6,7 +6,7 @@ To add the following to your channels.scm
        (url "https://example.org/some-channel.git")
        (introduction
         (make-channel-introduction
-         "cc4865b51e4c5ddd0f2f78e67d5d4428e2ee8c21"
+         "1dc0f4bba185b59833d815222c67034e91fe2588"
          (openpgp-fingerprint
-          "F532 5D13 813D 82F0 D253 EEAB CA48 C392 F00A 4B91"))))
+          "F532 5D13 813D 82F0 D253  EEAB CA48 C392 F00A 4B91"))))
 #+end_src
