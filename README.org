@@ -1,5 +1,5 @@
 * Guix Channel
-To add the following to your channels.scm
+Add the following to your channels.scm
 #+begin_src scheme
      (channel
        (name 'd1024)
