@@ -1,9 +1,9 @@
-* Channel
+* Guix Channel
 To add the following to your channels.scm
 #+begin_src scheme
      (channel
        (name 'd1024)
-       (url "https://example.org/some-channel.git")
+       (url "https://github.com/delta1024/d1024.git")
        (introduction
         (make-channel-introduction
          "1dc0f4bba185b59833d815222c67034e91fe2588"
