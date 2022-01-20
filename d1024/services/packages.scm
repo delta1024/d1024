@@ -14,6 +14,7 @@
   #:use-module (gnu packages video)
   #:use-module (gnu packages terminals)
   #:use-module (gnu packages wm)
+  #:use-module (gnu packages admin)
   #:use-module (gnu packages web-browsers)
   #:use-module (gnu packages image-viewers)
   #:use-module (gnu packages mpd)
@@ -47,6 +48,7 @@
 	lf
         zsh
         ispell
+	opendoas
 ;;	password-store
         pinentry
         zip
@@ -58,8 +60,8 @@
 
 (define wrath-packages
   (append
-   wrath-packages-base))
-   ;; large-packages))
+   wrath-packages-base;;))
+   large-packages))
 
 (define desktop-packages
    (list dunst

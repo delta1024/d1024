@@ -2,8 +2,10 @@
   #:use-module (gnu)
   #:use-module (gnu packages shells)
   #:use-module (gnu packages wm)
+  #:use-module (gnu packages admin)
   #:use-module (gnu services dbus)
   #:use-module (gnu system keyboard)
+  #:use-module (gnu system setuid)
   #:use-module (gnu services pm)
   #:use-module (gnu home)
   #:use-module (srfi srfi-1)
@@ -32,6 +34,7 @@
 	    user-packages
 	    user-services
 	    default-system
+	    system-setuid
 	    get-system-config
 	    get-home-config))
 (use-service-modules
@@ -73,7 +76,7 @@
 ;;   (salary  employee-salary set-employee-salary!))
 
 (define-record-type <base-system>
-  (base-system host local time-zone kernel firmware keyboard-layout bootloader mapped-devices file-system swap-devices users packages system-services)
+  (base-system host local time-zone kernel firmware keyboard-layout bootloader mapped-devices file-system swap-devices users packages system-services setuid)
   base-system?
   (host system-host)
   (local system-local)
@@ -87,7 +90,8 @@
   (swap-devices system-swap)
   (users system-users)
   (packages system-packages)
-  (system-services system-system-services))
+  (system-services system-system-services)
+  (setuid system-setuid))
 
 (define-record-type <user-config>
   (user-config packages services)
@@ -145,24 +149,29 @@
           (specification->package "stumpwm")
 	  (specification->package "make")
           (specification->package "gnupg")
+          (specification->package "opendoas")
           (specification->package "xauth")
           (specification->package "zsh")
 	  ;; (specification->package "flatpak")
           (specification->package "curl")
           ;; (specification->package "system-config-printer")
           ;; (specification->package
-          ;;  "emacs-desktop-environment")
+          ;;  "emacs-desktop-enviroment")
           (specification->package "nss-certs"))
     %base-packages)
 
    (cons* ;; (service xfce-desktop-service-type)
-	  ;; (service cups-service-type)
-          (service openssh-service-type)
-          (service nix-service-type)
-          (extra-special-file "/usr/bin/env"
-                              (file-append coreutils "/bin/env"))
-          (modify-services %my-desktop-services
-                           (delete gdm-service-type)))))
+    ;; (service cups-service-type)
+    (service openssh-service-type)
+    (service nix-service-type)
+    (extra-special-file "/usr/bin/env"
+                        (file-append coreutils "/bin/env"))
+    (modify-services %my-desktop-services
+                     (delete gdm-service-type)))
+   (append (list (setuid-program
+		  (program (file-append opendoas "/bin/doas"))))
+		 %setuid-programs)))
+
 (define default-user
   (user-config '() '()))
 
@@ -173,18 +182,19 @@
 (define (get-system-config config)
   (let* ((os-config (get-os config))
 	 (host (system-host os-config))
-	(local (system-local os-config))
-	(timezone (system-time-zone (get-os config)))
-	(kernel (system-kernel (get-os config)))
-	(firmware (system-firmware (get-os config)))
-	(%my-keyboard-layout (system-keyboard-layout (get-os config)))
-	(bootloader (system-bootloader (get-os config)))
-	(mapped-dev (system-mapped-dev (get-os config)))
-	(file-systems (system-file-system (get-os config)))
-	(swap-devices (system-swap (get-os config)))
-	(users (system-users (get-os config)))
-	(packages (system-packages (get-os config)))
-	(services (system-system-services (get-os config))))
+	 (local (system-local os-config))
+	 (timezone (system-time-zone os-config))
+	 (kernel (system-kernel os-config))
+	 (firmware (system-firmware os-config))
+	 (%my-keyboard-layout (system-keyboard-layout os-config))
+	 (bootloader (system-bootloader os-config))
+	 (mapped-dev (system-mapped-dev os-config))
+	 (file-systems (system-file-system os-config))
+	 (swap-devices (system-swap os-config))
+	 (users (system-users os-config))
+	 (packages (system-packages os-config))
+	 (services (system-system-services os-config))
+	 (set-uid (system-setuid os-config)))
 
     (operating-system
      (host-name host)
@@ -199,12 +209,13 @@
      (swap-devices swap-devices)
      (users users)
      (packages packages)
-     (services services))))
+     (services services)
+     (setuid-programs set-uid))))
 
 (define (get-home-config config)
   (let ((packages (user-packages (get-user config)))
 	(services (user-services (get-user config))))
-  (home-environment
-   (packages packages)
-   (services services))))
-	     
+    (home-environment
+     (packages packages)
+     (services services))))
+
