@@ -48,7 +48,7 @@
 	lf
         zsh
         ispell
-	opendoas
+	;; opendoas
 ;;	password-store
         pinentry
         zip

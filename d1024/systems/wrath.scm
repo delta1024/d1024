@@ -10,7 +10,7 @@
   #:use-module (gnu system file-systems)
   #:use-module (srfi srfi-9 gnu)
   #:use-module (ice-9 pretty-print)
-  #:use-module (d1024 base-system)
+  #:use-module (d1024 config)
 
   #:export (wrath-system)
   #:re-export (get-system-config

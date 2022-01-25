@@ -4,22 +4,23 @@
   #:use-module (gnu home-services-utils)
   #:use-module (gnu home services shepherd)
   #:use-module (gnu packages wm)
-  #:use-module (srfi srfi-26)
   #:use-module (gnu services configuration)
+  #:use-module (srfi srfi-26)
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 curried-definitions)
   #:use-module (ice-9 pretty-print)
   #:use-module (gnu services)
+  #:use-module (d1024 config)
   #:use-module (gnu services shepherd)
   #:use-module (guix gexp))
 
-(define (serialize-commonlisp-config val)
+(define (serialize-lisp-config val)
   (define (serialize-list-element elem)
     (cond
      ((gexp? elem)
       elem)
      (else
-      #~(string-trim-right
+     #~(string-trim-right
 	 (with-output-to-string
 	   (lambda ()
 	     ((@@ (ice-9 pretty-print) pretty-print)
@@ -63,7 +64,7 @@
   (list 
    `("config/stumpwm/config"
      ,(mixed-text-file "stumpwmrc"
-		  (serialize-commonlisp-config
+		  (serialize-lisp-config
 		   (append
 		   ;;		   mode-line
 		   emacs-mode

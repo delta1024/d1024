@@ -1,4 +1,4 @@
-(define-module (d1024 base-system)
+(define-module (d1024 config)
   #:use-module (gnu)
   #:use-module (gnu packages shells)
   #:use-module (gnu packages wm)
@@ -12,6 +12,9 @@
   #:use-module (srfi srfi-9)
   #:use-module (ice-9 pretty-print)
   #:use-module (srfi srfi-9 gnu)
+  #:use-module (ice-9 curried-definitions)
+  #:use-module (srfi srfi-26)
+  #:use-module (srfi srfi-1)
   #:use-module (nongnu packages linux)
 
   #:export (full-default-system
