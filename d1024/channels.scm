@@ -1,12 +1,12 @@
 (list
- (channel
-  (name 'd1024)
-  (url "https://github.com/delta1024/d1024.git")
-  (introduction
-   (make-channel-introduction
-    "1dc0f4bba185b59833d815222c67034e91fe2588"
-    (openpgp-fingerprint
-     "F532 5D13 813D 82F0 D253  EEAB CA48 C392 F00A 4B91"))))
+ ;; (channel
+ ;;  (name 'd1024)
+ ;;  (url "https://github.com/delta1024/d1024.git")
+ ;;  (introduction
+ ;;   (make-channel-introduction
+ ;;    "1dc0f4bba185b59833d815222c67034e91fe2588"
+ ;;    (openpgp-fingerprint
+ ;;     "F532 5D13 813D 82F0 D253  EEAB CA48 C392 F00A 4B91"))))
  (channel
   (name 'flat)
   (url "https://github.com/flatwhatson/guix-channel.git")

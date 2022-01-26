@@ -46,6 +46,7 @@
 		      ,channels)
 		    `("config/guix/channels.scm"
 		      ,channels)))))
+
 (define %my-keyboard-layout
   (keyboard-layout "us" #:model "thinkpad"))
 

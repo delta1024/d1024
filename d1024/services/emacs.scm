@@ -68,6 +68,7 @@
   (list 
    (service  home-emacs-service-type
 	     (home-emacs-configuration
+	      (package emacs-next)
 	      (elisp-packages
 	       packages)
 	      (server-mode? #t)
