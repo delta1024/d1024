@@ -92,6 +92,12 @@
                                  (xorg-configuration
                                   (xorg-configuration
 				   (keyboard-layout %my-keyboard-layout)))))
+     (simple-service 'doas-conf
+		     etc-service-type
+		     (list `("doas.conf" ,(plain-file "doas.conf" "\
+permit nopass jake as root cmd halt
+permit nopass jake as root cmd loginctl
+"))))
      (system-system-services (get-os full-default-system))))
    ((get-os system-swap)
     (list
@@ -107,7 +113,8 @@
       (simple-service 'home-state
 		      home-state-service-type
 		      (list
-		       (state-git ".systems/d1024" "git@github.com:delta1024/d1024.git" ))))
+		       (state-git ".systems/d1024" "git@github.com:delta1024/d1024.git" )
+		       (state-git ".emacs.d" "https://github.com/plexus/chemacs2.git"))))
      sym-services
      shell-services
      emacs-services
