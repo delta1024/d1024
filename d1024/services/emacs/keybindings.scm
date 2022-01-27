@@ -4,9 +4,9 @@
 	    evil-want-keybinding 'nil
 	    evil-vsplit-window-right t
 	    evil-split-window-below t)
-	   (:bind-into evil-insert-state "C-g" evil-normal-state)
-	   (:bind-into evil-visual-state "C-g" evil-normal-state)
-	   (:bind-into evil-replace-state "C-g" evil-normal-state))
+	   (:bind-map evil-insert-state-map "C-g" evil-normal-state)
+	   (:bind-map evil-visual-state-map "C-g" evil-normal-state)
+	   (:bind-map evil-replace-state-map "C-g" evil-normal-state))
 
     (setup general
 	   (:load-after evil)

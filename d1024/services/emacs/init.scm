@@ -1,6 +1,7 @@
 (define-module (d1024 services emacs init)
   #:use-module (gnu services)
-  #:use-module (guix gexp))
+  #:use-module (guix gexp)
+  #:declarative? #f)
 
 (define-public early-init
   `((setq package-enable-at-startup nil)
@@ -27,26 +28,27 @@
 
     ,#~"(add-hook 'emacs-startup-hook #'my/display-startup-time)"
     (defvar bootstrap-version)))
+
 (define bootstrap-setup
   '((let ((bootstrap-file
 	   (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
 	  (bootstrap-version 5))
       (unless (file-exists-p bootstrap-file)
 	(with-current-buffer
-         (url-retrieve-synchronously
-          "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-          'silent 'inhibit-cookies)
-	 (goto-char (point-max))
-	 (eval-print-last-sexp)))
+            (url-retrieve-synchronously
+             "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+             'silent 'inhibit-cookies)
+	  (goto-char (point-max))
+	  (eval-print-last-sexp)))
       (load bootstrap-file nil 'nomessage))
 
     (require 'setup)))
 (define setup-defs
   `((setup-define :auto-mode
-		  (lambda (list-alist)
-		    `(add-to-list 'auto-mode-alist
-				  ',list-alist))
-		  :documentation "adds pair to auto-mode-alist")
+      (lambda (list-alist)
+	`(add-to-list 'auto-mode-alist
+		      ',list-alist))
+      :documentation "adds pair to auto-mode-alist")
 
     ,#~"(setup-define :bind-map
 		  (lambda (map key func)
@@ -55,47 +57,58 @@
 		  :after-loaded t)"
 
     (setup-define :hide-mode
-		  (lambda (&optional mode)
-		    (let* ((mode (or mode (setup-get 'mode)))
-			   (mode (if (string-match-p "-mode\\'" (symbol-name mode))
-				     mode
-				     (intern (format "%s-mode" mode)))))
-		      `(setq minor-mode-alist
-			     (delq (assq ',mode minor-mode-alist)
-				   minor-mode-alist))))
-		  :documentation "Hide the mode-line lighter of the current mode.
+      (lambda (&optional mode)
+	(let* ((mode (or mode (setup-get 'mode)))
+	       (mode (if (string-match-p "-mode\\'" (symbol-name mode))
+			 mode
+		       (intern (format "%s-mode" mode)))))
+	  `(setq minor-mode-alist
+		 (delq (assq ',mode minor-mode-alist)
+		       minor-mode-alist))))
+      :documentation "Hide the mode-line lighter of the current mode.
 Alternatively, MODE can be specified manually, and override the
 current mode."
-		  :after-loaded t)
+      :after-loaded t)
+
+    (setup-define :evil-collection
+      (lambda (mode key binding)
+	(let* ((active-mode (setup-get 'mode))
+	       (active-map (if (string-match-p "-mode\\'" (symbol-name mode))
+			       active-mode
+			     (intern (format "%s-mode" active-mode)))))
+	  `(with-eval-after-load 'evil 
+	     (evil-collection-define-key ',mode
+	       ',(intern (format "%s-map" active-map)) ,(kbd key) ',binding))))
+      :documentation "creaes evil collection binding")
 
     (setup-define :autoload
-		  (lambda (&rest load-function)
-		    `(autoload ',(car load-function)
-			       ,(nth 1 load-function) nil t))
-		  :documentation "declare autoload for `function` from \"file\"")
+      (lambda (&rest load-function)
+	`(autoload ',(car load-function)
+	   ,(nth 1 load-function) nil t))
+      :documentation "declare autoload for `function` from \"file\"")
 
     (setup-define :load-after
-		  (lambda (&rest features)
-		    (let ((body `(require ',(setup-get 'feature))))
-		      (dolist (feature (nreverse features))
-			      (setq body `(with-eval-after-load ',feature ,body)))
-		      body))
-		  :documentation "Load the current feature after FEATURES.")
+      (lambda (&rest features)
+	(let ((body `(require ',(setup-get 'feature))))
+	  (dolist (feature (nreverse features))
+	    (setq body `(with-eval-after-load ',feature ,body)))
+	  body))
+      :documentation "Load the current feature after FEATURES.")
 
     (setup-define :straight
-		  (lambda (recipe)
-		    `(unless (straight-use-package ',recipe)
-		       ,(setup-quit)))
-		  :documentation
-		  "Install RECIPE with `straight-use-package'.
+      (lambda (recipe)
+	`(unless (straight-use-package ',recipe)
+	   ,(setup-quit)))
+      :documentation
+      "Install RECIPE with `straight-use-package'.
 This macro can be used as HEAD, and will replace itself with the
 first RECIPE's package."
-		  :repeatable t
-		  :shorthand (lambda (sexp)
-			       (let ((recipe (cadr sexp)))
-				 (if (consp recipe)
-				     (car recipe)
-				     recipe))))))
+      :repeatable t
+      :shorthand (lambda (sexp)
+		   (let ((recipe (cadr sexp)))
+		     (if (consp recipe)
+			 (car recipe)
+		       recipe))))))
 (define more-vars-and-littering
   '((setq inhibit-startup-message t)
 
@@ -121,11 +134,11 @@ first RECIPE's package."
                     markdown-mode
                     eshell-mode-hook
                     dired-mode-hook))
-	    (add-hook mode (lambda () (display-line-numbers-mode 0))))
+      (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
     (setup (:require no-littering)
-	   (:option auto-save-file-name-transforms
-	    `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))))
+      (:option auto-save-file-name-transforms
+	       `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))))
 
 (load (canonicalize-path "d1024/d1024/services/emacs/keybindings.scm"))
 
@@ -138,58 +151,69 @@ first RECIPE's package."
 	   (:require dired-single)
 	   (:require all-the-icons-dired)
 	   (:require dired-hide-dotfiles)
-	   
 	   (:hook dired-hide-details-mode)
 	   (:hook all-the-icons-dired-mode)
 	   (:hook dired-hide-dotfiles-mode)
 
 	   (:option dired-always-read-filesystem t
 	    dired-listing-switches "-AGgD --group-directories-first"
-	    dired-kill-when-opening-new-dired-buffer t)
-	   (evil-collection-define-key 'normal 'dired-mode-map
-				       "h" 'dired-single-up-directory
-				       "l" 'dired-single-buffer
-				       "H" 'dired-hide-dotfiles-mode))
+	    dired-kill-when-opening-new-dired-buffer t))
+
+    (setup (:straight (dired-hide-dotfiles
+		       :type git
+		       :host github
+		       :repo "mattiasb/dired-hide-dotfiles"))
+      (:with-mode dired
+	(:evil-collection normal "H" dired-hide-dotfiles-mode)))
+
+    (setup (:straight (dired-single
+		       :type git
+		       :host github
+		       :repo "crocket/dired-single"))
+      (:with-mode dired
+	(:evil-collection normal "h" dired-single-up-directory)
+	(:evil-collection normal "l" dired-single-buffer)))
+
     (setup (:straight dired-open)
-	   (:load-after dired)
-	   (:option dired-open-extensions '(("png" . "sxiv")
-					    ("mkv" . "mpv")
-					    ("webm" . "mpv")
-					    ("odt" . "libreoffice -o"))))))
+      (:load-after dired)
+      (:option dired-open-extensions '(("png" . "sxiv")
+					("mkv" . "mpv")
+					("webm" . "mpv")
+					("odt" . "libreoffice -o"))))))
 
 (load (canonicalize-path "d1024/d1024/services/emacs/org.scm"))
 
 (define devel
   `((setup (:require rainbow-delimiters)
-  (:hook-into prog-mode))  
+      (:hook-into prog-mode))  
 
-(setup magit
-  (:load-after evil))
-,#~"(define-key my-leader-mode-map (kbd \"g\") #'magit)"
+    (setup magit
+      (:load-after evil))
+    ,#~"(define-key my-leader-mode-map (kbd \"g\") #'magit)"
 
-(setup (:require helpful)
-  (:global "C-h f" helpful-callable)
-  (:global "C-h v" helpful-variable)
-  (:global "C-h k" helpful-key))
+    (setup (:require helpful)
+      (:global "C-h f" helpful-callable)
+      (:global "C-h v" helpful-variable)
+      (:global "C-h k" helpful-key))
 
-(defun my/org-mode-visual-fill () 
-  (setq visual-fill-column-width 115
-	visual-fill-column-center-text t)
-  (visual-fill-column-mode 1))
+    (defun my/org-mode-visual-fill () 
+      (setq visual-fill-column-width 115
+	    visual-fill-column-center-text t)
+      (visual-fill-column-mode 1))
 
-(setup visual-fill-column
-  (:load-after org)
-  (:with-mode org-mode
-    (:hook my/org-mode-visual-fill))
-  (:with-mode markdown-mode
-    (:hook my/org-mode-visual-fill)))
+    (setup visual-fill-column
+      (:load-after org)
+      (:with-mode org-mode
+	(:hook my/org-mode-visual-fill))
+      (:with-mode markdown-mode
+	(:hook my/org-mode-visual-fill)))
 
-(setup markdown-mode
-  (:autoload gfm-mode "markdown-mode")
-  (:auto-mode ("README\\.md\\'" . gfm-mode))
-  (:auto-mode ("\\.md\\'" . markdown-mode))
-  (:auto-mode ("\\.markdown\\'" . markdown-mode))
-  (:option markdown-command "multimarkdown"))))
+    (setup markdown-mode
+      (:autoload gfm-mode "markdown-mode")
+      (:auto-mode ("README\\.md\\'" . gfm-mode))
+      (:auto-mode ("\\.md\\'" . markdown-mode))
+      (:auto-mode ("\\.markdown\\'" . markdown-mode))
+      (:option markdown-command "multimarkdown"))))
 
 (define misc
   `((defun my/minibuffer-backward-kill (arg)
@@ -200,32 +224,32 @@ first RECIPE's package."
           ;; Borrowed from https://github.com/raxod502/selectrum/issues/498#issuecomment-803283608
           (if (string-match-p "/." (minibuffer-contents))
               (zap-up-to-char (- arg) ?/)
-              (delete-minibuffer-contents))
-	  (delete-backward-char arg)))
+            (delete-minibuffer-contents))
+	(delete-backward-char arg)))
 
     (setup vertico
-	   (:option vertico-cycle t
-	    vertico-resize t)
-	   (:bind-map vertico-map "C-j" vertico-next)
-	   (:bind-map vertico-map "C-k" vertico-previous)
-	   (:bind-map minibuffer-local-map "<backspace>" my/minibuffer-backward-kill))
+      (:option vertico-cycle t
+	       vertico-resize t)
+      (:bind-map vertico-map "C-j" vertico-next)
+      (:bind-map vertico-map "C-k" vertico-previous)
+      (:bind-map minibuffer-local-map "<backspace>" my/minibuffer-backward-kill))
     (vertico-mode)
 
     ,#~"(setup (:require orderless)
 	   (:option completion-styles '(orderless)
 	    completion-category-defaults nil
 	    completion-category-overrides '((file (styles partial-completion)))
-	    selectrum-highlight-candidates-function #'orderless-highlight-matches))"
+	    selectrum-highlight-caneidates-function #'orderless-highlight-matches))"
 
     (setup (:require savehist))
 
     (setup (:require selectrum))
 
     (setup (:require consult)
-	   (:global "C-s" consult-line))
+      (:global "C-s" consult-line))
 
     (setup marginalia
-	   (:bind-map minibuffer-local-map "M-A" marginalia-cycle))
+      (:bind-map minibuffer-local-map "M-A" marginalia-cycle))
 
     (setup (:require pass))
 
@@ -241,12 +265,12 @@ first RECIPE's package."
     ;; M-x all-the-icons-install-fonts
     (setup (:require all-the-icons))
     (setup (:require doom-modeline)
-	   (:option doom-modeline-mode t
-	    doom-mode-line-height 13))
+      (:option doom-modeline-mode t
+	       doom-mode-line-height 13))
 
     (setup (:require which-key)
-	   (:hide-mode which-key)
-	   (:option which-key-idle-delay 1))
+      (:hide-mode which-key)
+      (:option which-key-idle-delay 1))
 
     (setup (:require swiper))
 
@@ -263,10 +287,10 @@ first RECIPE's package."
     (load-theme emacs-theme t)
 
     (defun my/post-config () "Sets the `gc-cons-threshold' to a sane value and loads the custom file, among other things"
-      (require 'org)
-      (setq gc-cons-threshold (* 2 1000 1000))
-      (load custom-file :noerror)
-      (setq my/post-config t))
+	   (require 'org)
+	   (setq gc-cons-threshold (* 2 1000 1000))
+	   (load custom-file :noerror)
+	   (setq my/post-config t))
 
     (my/post-config)))
 
