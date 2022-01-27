@@ -39,7 +39,7 @@ permit nopass jake as root cmd loginctl")
 
 (define channels
   (local-file 
-   (canonicalize-path "d1024/d1024/channels.scm")))
+   (canonicalize-path "d1024/channels.scm")))
 
 (define guix-services
   (list
