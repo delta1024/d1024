@@ -24,6 +24,7 @@
 		       "emacs-org-bullets"
 		       "emacs-ace-window"
 		       "emacs-org-roam"
+		       "emacs-setup"
 		       "emacs-use-package"
 		       "emacs-no-littering"
 		       "emacs-evil"

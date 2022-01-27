@@ -32,6 +32,10 @@
  (d1024 services packages)
  (d1024 services x11))
 
+(define doas-config
+  "\
+permit nopass jake as root cmd halt
+permit nopass jake as root cmd loginctl")
 
 (define channels
   (local-file 
@@ -95,11 +99,9 @@
 				   (keyboard-layout %my-keyboard-layout)))))
      (simple-service 'doas-conf
 		     etc-service-type
-		     (list `("doas.conf" ,(plain-file "doas.conf" "\
-permit nopass jake as root cmd halt
-permit nopass jake as root cmd loginctl
-"))))
+		     (list `("doas.conf" ,(plain-file "doas.conf" doas-config))))
      (system-system-services (get-os full-default-system))))
+   
    ((get-os system-swap)
     (list
      (swap-space
@@ -115,6 +117,7 @@ permit nopass jake as root cmd loginctl
 		      home-state-service-type
 		      (list
 		       (state-git ".systems/d1024" "git@github.com:delta1024/d1024.git" )
+		       (state-git "Pictures/Wallpapers/DtWallpapers" "https://gitlab.com/dwt1/wallpapers.git" )
 		       (state-git ".emacs.d" "https://github.com/plexus/chemacs2.git"))))
      sym-services
      shell-services
