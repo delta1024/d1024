@@ -1,5 +1,4 @@
 (define-module (d1024 services emacs)
-  #:use-module (d1024 services emacs init)
   #:use-module (gnu packages)
   #:use-module (gnu packages emacs)
   #:use-module (gnu packages emacs-xyz)
@@ -12,10 +11,12 @@
   #:use-module (srfi srfi-11)
   #:use-module (guix packages)
   #:use-module (guix gexp)
+  #:use-module (guix transformations)
   #:use-module (guix channels)
   #:use-module (guix transformations)
   #:use-module (rde packages)
   #:use-module (gnu home-services emacs)
+  #:use-module (gnu home-services-utils)
   ;; #:use-module (guix home-services files)
   #:use-module (guix download))
 (define packages
@@ -65,6 +66,26 @@
 		       "emacs-swiper"
                        "emacs-pdf-tools"
 		       "emacs-perspective")))
+(define emacs-src-dir
+   (string-append (getenv "HOME") "/.system/d1024/d1024/services/emacs"))
+(define early-init
+  (list
+   (slurp-file-gexp
+    (local-file
+		     (string-append emacs-src-dir
+				    "/early-init.el")))))
+(define init
+  (list
+   (slurp-file-gexp (local-file
+		     (string-append emacs-src-dir
+				    "/init.el")))))
+(define emacs-aux-files
+  (list
+   `("config/emacs/src/keybindings.el"
+     ,(local-file (string-append emacs-src-dir "/keybindings.el")))
+   `("config/emacs/src/org.el"
+     ,(local-file (string-append emacs-src-dir "/org.el")))))
+
 (define-public emacs-services
   (list 
    (service  home-emacs-service-type
@@ -76,5 +97,8 @@
 	      (early-init-el
 	       early-init)
 	      (init-el
-	       init)))))
+	       init)))
+   (simple-service 'emacs-support-files
+		   home-files-service-type
+		   emacs-aux-files)))
 	
