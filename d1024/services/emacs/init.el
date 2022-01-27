@@ -58,15 +58,16 @@ current mode."
   :after-loaded t)
 
 (setup-define :evil-collection
-  (lambda (mode key binding)
+  (lambda (evil-mode key binding &optional no-mode?)
     (let* ((active-mode (setup-get 'mode))
-	   (active-map (if (string-match-p "-mode\\'" (symbol-name mode))
+	   (active-map (if no-mode? active-mode
+	    (if (string-match-p "-mode\\'" (symbol-name active-mode))
 			   active-mode
-			 (intern (format "%s-mode" active-mode)))))
-      `(with-eval-after-load 'evil 
-	 (evil-collection-define-key ',mode
+			 (intern (format "%s-mode" active-mode))))))
+      `(with-eval-after-load 'evil-collection
+	 (evil-collection-define-key ',evil-mode
 	   ',(intern (format "%s-map" active-map)) ,(kbd key) ',binding))))
-  :documentation "creaes evil collection binding")
+  :documentation "creaes evil collection binding if no-mode? is t then `-mode' will be omitted from map name")
 
 (setup-define :autoload
   (lambda (&rest load-function)
@@ -126,16 +127,15 @@ first RECIPE's package."
   (:option auto-save-file-name-transforms
 	   `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
 
-(load (expand-file-name "src/keybindings.el" user-emacs-directory))
 
 (setup dired
   (:load-after evil)
   (:autoload dired-jump "dired")
   (:bind "C-x C-j" dired-jump)
-  (:require dired-x)
-  (:require dired-single)
-  (:require all-the-icons-dired)
-  (:require dired-hide-dotfiles)
+  (:also-load dired-x)
+  (:also-load dired-single)
+  (:also-load all-the-icons-dired)
+  (:also-load dired-hide-dotfiles)
   (:hook dired-hide-details-mode)
   (:hook all-the-icons-dired-mode)
   (:hook dired-hide-dotfiles-mode)
@@ -166,6 +166,7 @@ first RECIPE's package."
 				   ("webm" . "mpv")
 				   ("odt" . "libreoffice -o"))))
 
+(load (expand-file-name "src/keybindings.el" user-emacs-directory))
 (load (expand-file-name "src/org.el" user-emacs-directory))
 
 (setup (:require rainbow-delimiters)
@@ -216,7 +217,6 @@ first RECIPE's package."
   (:bind-map vertico-map "C-j" vertico-next)
   (:bind-map vertico-map "C-k" vertico-previous)
   (:bind-map minibuffer-local-map "<backspace>" my/minibuffer-backward-kill))
-(vertico-mode)
 
 (setup (:require orderless)
   (:option completion-styles '(orderless)
@@ -259,22 +259,26 @@ first RECIPE's package."
 
 (setup (:require perspective))
 
-(evil-mode 1)
-(evil-collection-init)
-(persp-mode 1)
-(which-key-mode 1)
-(savehist-mode 1)
-(marginalia-mode 1)
-(pinentry-start)
-(disable-theme 'deeper-blue)
-(load-theme emacs-theme t)
+(defun configure-emacs ()
+  (require 'evil)
+  (require 'evil-collection)
+  (require 'org)
+  (vertico-mode)
+  (evil-mode 1)
+  (evil-collection-init)
+  (persp-mode 1)
+  (which-key-mode 1)
+  (savehist-mode 1)
+  (marginalia-mode 1)
+  (pinentry-start)
+  (disable-theme 'deeper-blue)
+  (load-theme emacs-theme t))
 
-(defun my/post-config () "Sets the `gc-cons-threshold' to a sane value and loads the custom file, among other things"
-       (require 'org)
-       (setq gc-cons-threshold (* 2 1000 1000))
+(defun my/post-config () "loads the custom file"
        (load custom-file :noerror)
        (setq my/post-config t))
 
+(configure-emacs)
 (my/post-config)
 
 

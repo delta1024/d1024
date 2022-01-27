@@ -68,15 +68,25 @@
                                       (udev-configuration (inherit config)
                                                           (rules (cons %backlight-udev-rule
                                                                        (udev-configuration-rules config)))))
+
+		   (guix-service-type config =>
+				      (guix-configuration
+				       (inherit-config)
+				       (substitute-urls
+					(append (list "https://substitutes.nonguix.org")
+						%default-substitute-urls))
+				       (authorized-keys
+					(append (list (plain-file "non-guix.pub"
+								  "(public-key 
+ (ecc 
+  (curve Ed25519)
+  (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)
+  )
+ )"))
+						%default-authorized-guix-keys))))
                    ))
 
 
-;; (define-record-type <employee>
-;;   (make-employee name age salary)
-;;   employee?
-;;   (name    employee-name)
-;;   (age     employee-age    set-employee-age!)
-;;   (salary  employee-salary set-employee-salary!))
 
 (define-record-type <base-system>
   (base-system host local time-zone kernel firmware keyboard-layout bootloader mapped-devices file-system swap-devices users packages system-services setuid)
@@ -110,6 +120,7 @@
 
 (define my-keyboard
   (keyboard-layout "us"))
+
 (define default-system
   (base-system
    "FullMetalAlchemist"

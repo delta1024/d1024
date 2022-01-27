@@ -52,5 +52,3 @@
     "o f"   '(my/org-open-file                                        :wk "open org file")
     "o a"   '(org-agenda                                              :wk "org agenda")
     "c"     '(org-capture                                             :wk "change directory")))
-(require 'evil)
-(require 'evil-collection)
