@@ -5,9 +5,9 @@
   #:use-module (gnu packages admin)
   #:use-module (gnu services dbus)
   #:use-module (gnu system keyboard)
-  #:use-module (gnu system setuid)
   #:use-module (gnu services pm)
   #:use-module (gnu home)
+  #:use-module (gnu system setuid)
   #:use-module (srfi srfi-1)
   #:use-module (srfi srfi-9)
   #:use-module (ice-9 pretty-print)
@@ -159,10 +159,12 @@
           (specification->package "stow")
           (specification->package "neovim")
           (specification->package "sx")
+          (specification->package "slock")
           (specification->package "gcc-toolchain")
           (specification->package "stumpwm")
 	  (specification->package "make")
           (specification->package "gnupg")
+          (specification->package "dmenu")
           (specification->package "opendoas")
           (specification->package "xauth")
           (specification->package "zsh")
@@ -182,9 +184,7 @@
                         (file-append coreutils "/bin/env"))
     (modify-services %my-desktop-services
                      (delete gdm-service-type)))
-   (append (list (setuid-program
-		  (program (file-append opendoas "/bin/doas"))))
-		 %setuid-programs)))
+   %setuid-programs))
 
 (define default-user
   (user-config '() '()))
@@ -227,8 +227,9 @@
      (setuid-programs set-uid))))
 
 (define (get-home-config config)
-  (let ((packages (user-packages (get-user config)))
-	(services (user-services (get-user config))))
+  (let* ((user-config (get-user config))
+	 (packages (user-packages user-config))
+	 (services (user-services user-config)))
     (home-environment
      (packages packages)
      (services services))))

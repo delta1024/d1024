@@ -34,6 +34,30 @@
 
 (define emacs-mode (list #~";;-*- mode: common-lisp; -*-\n"))
 
+(define app-launcher
+  `((defcommand browser ()
+      ()
+      (run-shell-command "firefox"))
+    (defcommand system-config-terminal ()
+      ()
+      (run-shell-command "alacritty --working-directory ~/.system"))
+    (defcommand sys-suspend ()
+      ()
+      (run-shell-command "/home/jake/.scripts/prompt.sh 'Suspend System?' 'doas loginctl suspend'"))
+    
+    (defcommand sys-power-off ()
+      ()
+      (run-shell-command "/home/jake/.scripts/prompt.sh 'Powerdown System?' 'doas halt'"))
+      
+    (defvar *my-app-bindings*
+      (let ((m (stumpwm:make-sparse-keymap)))
+	(stumpwm:define-key m (stumpwm:kbd "b") "browser")
+	(stumpwm:define-key m (stumpwm:kbd "h") "system-config-terminal")
+	(stumpwm:define-key m (stumpwm:kbd "P") "sys-power-off")
+	(stumpwm:define-key m (stumpwm:kbd "p") "sys-suspend")
+	m))
+   ,#~"(stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd \"j\") '*my-app-bindings*)"))
+
 (define custom-functions
  `(,#~"(defun emacs ()
   (run-shell-command \"emacsclient -c\"))"
@@ -68,6 +92,7 @@
 		   (append
 		   ;;		   mode-line
 		   emacs-mode
+		   app-launcher
 		   custom-functions
 		   startup-programs
 		   keybinds))))))

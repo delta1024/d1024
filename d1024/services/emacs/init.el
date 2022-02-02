@@ -31,16 +31,12 @@
   (load bootstrap-file nil 'nomessage))
 
 (require 'setup)
-(setup-define :auto-mode
-  (lambda (list-alist)
-    `(add-to-list 'auto-mode-alist
-		  ',list-alist))
-  :documentation "adds pair to auto-mode-alist")
 
 (setup-define :bind-map
   (lambda (map key func)
     `(define-key ,map ,(kbd key) #',func))
   :documentation "Defines key on custom map without setups context"
+  :repeatable t
   :after-loaded t)
 
 (setup-define :hide-mode
@@ -61,12 +57,13 @@ current mode."
   (lambda (evil-mode key binding &optional no-mode?)
     (let* ((active-mode (setup-get 'mode))
 	   (active-map (if no-mode? active-mode
-	    (if (string-match-p "-mode\\'" (symbol-name active-mode))
-			   active-mode
-			 (intern (format "%s-mode" active-mode))))))
+			 (if (string-match-p "-mode\\'" (symbol-name active-mode))
+			     active-mode
+			   (intern (format "%s-mode" active-mode))))))
       `(with-eval-after-load 'evil-collection
 	 (evil-collection-define-key ',evil-mode
-	   ',(intern (format "%s-map" active-map)) ,(kbd key) ',binding))))
+	   ',(intern (format "%s-map" active-map)) ,(kbd key) #',binding))))
+  :repeatable t
   :documentation "creaes evil collection binding if no-mode? is t then `-mode' will be omitted from map name")
 
 (setup-define :autoload
@@ -129,16 +126,16 @@ first RECIPE's package."
 
 
 (setup dired
-  (:load-after evil)
-  (:autoload dired-jump "dired")
+  ;; (:load-after evil-collection)
+  (:autoload dired-jump "dired-x")
   (:bind "C-x C-j" dired-jump)
-  (:also-load dired-x)
-  (:also-load dired-single)
-  (:also-load all-the-icons-dired)
-  (:also-load dired-hide-dotfiles)
-  (:hook dired-hide-details-mode)
-  (:hook all-the-icons-dired-mode)
-  (:hook dired-hide-dotfiles-mode)
+  (:also-load dired-x
+	      dired-single
+	      all-the-icons-dired
+	      dired-hide-dotfiles)
+  (:hook dired-hide-details-mode
+	 dired-hide-dotfiles-mode
+	 all-the-icons-dired-mode)
 
   (:option dired-always-read-filesystem t
 	   dired-listing-switches "-AGgD --group-directories-first"
@@ -148,16 +145,17 @@ first RECIPE's package."
 		   :type git
 		   :host github
 		   :repo "mattiasb/dired-hide-dotfiles"))
-  (:with-mode dired
-    (:evil-collection normal "H" dired-hide-dotfiles-mode)))
+  (:bind-into dired "C-k" dired-hide-dotefiles-mode))
+  ;; (:with-mode dired
+  ;;   (:evil-collection normal "C-k" dired-hide-dotfiles-mode)))
 
-(setup (:straight (dired-single
-		   :type git
-		   :host github
-		   :repo "crocket/dired-single"))
-  (:with-mode dired
-    (:evil-collection normal "h" dired-single-up-directory)
-    (:evil-collection normal "l" dired-single-buffer)))
+;; (setup (:straight (dired-single
+;; 		   :type git
+;; 		   :host github
+;; 		   :repo "crocket/dired-single"))
+;;   (:with-mode dired
+;;     (:evil-collection normal "h" dired-single-up-directory
+;; 		      normal "l" dired-single-buffer)))
 
 (setup (:straight dired-open)
   (:load-after dired)
@@ -172,16 +170,14 @@ first RECIPE's package."
 (setup (:require rainbow-delimiters)
   (:hook-into prog-mode))  
 
-(setup magit
-  (:load-after evil))
-(define-key my-leader-mode-map (kbd "g") #'magit)
+(define-key my-leader-mode-map "g" #'magit)
 
 (setup (:require helpful)
-  (:global "C-h f" helpful-callable)
-  (:global "C-h v" helpful-variable)
-  (:global "C-h k" helpful-key))
+  (:global "C-h f" helpful-callable
+	   "C-h v" helpful-variable
+	   "C-h k" helpful-key))
 
-(defun my/org-mode-visual-fill () 
+(defun my/org-mode-visual-fill ()  
   (setq visual-fill-column-width 115
 	visual-fill-column-center-text t)
   (visual-fill-column-mode 1))
@@ -195,11 +191,18 @@ first RECIPE's package."
 
 (setup markdown-mode
   (:autoload gfm-mode "markdown-mode")
-  (:auto-mode ("README\\.md\\'" . gfm-mode))
-  (:auto-mode ("\\.md\\'" . markdown-mode))
-  (:auto-mode ("\\.markdown\\'" . markdown-mode))
+  (:with-mode gfm-mode
+    (:file-match "README\\.md\\'"))
+  (:file-match "\\.md\\'"
+	       "\\.markdown\\'")
   (:option markdown-command "multimarkdown"))
 
+(setup visual-fill-column
+  (:load-after org)
+  (:with-mode org-mode
+    (:hook my/org-mode-visual-fill))
+  (:with-mode markdown-mode
+    (:hook my/org-mode-visual-fill)))
 (defun my/minibuffer-backward-kill (arg)
   "When minibuffer is completing a file name delete up to parent
     folder, otherwise delete a character backward"
@@ -214,9 +217,20 @@ first RECIPE's package."
 (setup vertico
   (:option vertico-cycle t
 	   vertico-resize t)
-  (:bind-map vertico-map "C-j" vertico-next)
-  (:bind-map vertico-map "C-k" vertico-previous)
-  (:bind-map minibuffer-local-map "<backspace>" my/minibuffer-backward-kill))
+  (:bind-map vertico-map "C-j" vertico-nextk
+	     vertico-map "C-k" vertico-previous
+	     minibuffer-local-map "<backspace>" my/minibuffer-backward-kill))
+
+
+(setup embark
+  (:load-after evil)
+  (:autoload embark-prefix-help-command "embark")
+  (:bind-map evil-normal-state-map "C-." embark-act
+	     evil-normal-state-map "M-." embark-dwim)
+  (:global "C-." embark-act
+	   "M-." embark-dwim
+	   "C-h B" embark-bindings)
+  (:option prefix-help-command #'embark-prefix-help-command))
 
 (setup (:require orderless)
   (:option completion-styles '(orderless)
@@ -233,6 +247,17 @@ first RECIPE's package."
 
 (setup marginalia
   (:bind-map minibuffer-local-map "M-A" marginalia-cycle))
+
+(setup (:require lispy)
+  (:hook-into emacs-lisp-mode
+	      lisp-mode
+	      scheme-mode))
+
+;; (setup (:require lispyville)
+;;   (:hook-into lispy-mode
+;; 	      emacs-lisp-mode
+;; 	      lisp-mode
+;; 	      scheme-mode))
 
 (setup (:require pass))
 
@@ -260,12 +285,14 @@ first RECIPE's package."
 (setup (:require perspective))
 
 (defun configure-emacs ()
-  (require 'evil)
-  (require 'evil-collection)
+  "enables any minor modes that should be loaded after user
+settings have been applied"
+  ;; (require 'evil)
+  ;; (require 'evil-collection)
   (require 'org)
   (vertico-mode)
-  (evil-mode 1)
-  (evil-collection-init)
+  ;; (evil-mode 1)
+  ;; (evil-collection-init)
   (persp-mode 1)
   (which-key-mode 1)
   (savehist-mode 1)

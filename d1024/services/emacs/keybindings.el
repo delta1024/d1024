@@ -1,54 +1,62 @@
-(setup evil
-  (:option evil-want-integration t
-	   evil-want-keybinding 'nil
-	   evil-vsplit-window-right t
-	   evil-split-window-below t)
-  (:bind-map evil-insert-state-map "C-g" evil-normal-state)
-  (:bind-map evil-visual-state-map "C-g" evil-normal-state)
-  (:bind-map evil-replace-state-map "C-g" evil-normal-state))
+;; (setup evil
+;;   (:option evil-want-integration t
+;; 	   evil-want-keybinding 'nil
+;; 	   evil-vsplit-window-right t
+;; 	   evil-split-window-below t)
+;;   (:bind-map evil-insert-state-map "C-g" evil-normal-state)
+;;   (:bind-map evil-visual-state-map "C-g" evil-normal-state)
+;;   (:bind-map evil-replace-state-map "C-g" evil-normal-state))
 
-(setup general
-  (:load-after evil)
-  (:option general-evil-setup t)
-  (:global "C-c k" 'my-leader-command)
-  (general-create-definer my/leader-def
-    :keymaps '(normal insert visual emacs)
-    :prefix "C-SPC"
-    :global-prefix "C-SPC"
-    :prefix-command 'my-leader-command
-    :prefix-map 'my-leader-mode-map)
-  (my/leader-def
-    "g"     '(magit :wk "Magit")
-    "f"     '(nil                                                     :wk "file system")
-    "f f"   '(find-file                                               :wk "save-file")
-    "f s"   '(save-buffer                                             :wk "save file")
-    "f r"   '((lambda () (interactive) (find-file "/sudo::"))         :wk "open file as root")
+(define-prefix-command 'my-leader-command 'my-leader-mode-map "Shortcuts")
+(global-set-key (kbd "C-c C-k") #'my-leader-command)
+(setup-define :my-leader
+  (lambda (key binding)
+    `(define-key my-leader-mode-map ,(kbd key) #',binding))
+  :documentation "binds KEY to BINDING on `my-leader-mode-map'"
+  :repeatable t)
 
-    "h"     '(nil                                                     :wk "config options")
-    "h e"   '((lambda () (interactive)
+(setup keys
+  (:my-leader 
+    "f f"   find-file                                               
+    "f s"   save-buffer                                             
+    "f r"   (lambda () (interactive) (find-file "/sudo::"))
+
+    "h e"   (lambda () (interactive)
 		(dired "~/.system/d1024/d1024/services/emacs"))
-	      :wk "emacs configuration")
-    "h s" '((lambda () (interactive)
-	      (dired "~/.system/d1024/d1024/systems"))
-	    :wk "system configuration")
-    "h h" '((lambda () (interactive)
-	      (dired "~/.system/d1024/d1024/services"))
-	    :wk "home services")
-    "h d" '((lambda () (interactive)
-	      (find-file (expand-file-name "stumpwm.scm" "~/.system/d1024/d1024/services/x11")))
-	    :wk "desktop configuration")
 
-    "d"     '((lambda () (interactive) (dired "~/")) :wk "Dired home")
-    "a"     '((lambda () (interactive) (start-process-shell-command "alacritty" nil "alacritty --working-directory ~/ -e nu"))
-	      :wk "nu ~")
-    "A"     '((lambda () (interactive) (start-process-shell-command "alacritty" nil "alacritty -e nu"))
-	      :wk "nu")
-    ";"     '(execute-extended-command                                :wk "M-x")
-    "w f"   '(delete-frame                                            :wk "delete fram")
-    "b"     '(consult-buffer                                          :wk "switch buffers with preview")
+    "h s" (lambda () (interactive)
+	      (dired "~/.system/d1024/d1024/systems"))
+
+    "h h" (lambda () (interactive)
+	      (dired "~/.system/d1024/d1024/services"))
+
+    "h d" (lambda () (interactive)
+	      (find-file (expand-file-name "stumpwm.scm" "~/.system/d1024/d1024/services/x11")))
+
+    "d"     (lambda () (interactive) (dired "~/")) 
+    "a"     (lambda () (interactive) (start-process-shell-command "alacritty" nil "alacritty --working-directory ~/ -e nu"))
+	    
+    "A"     (lambda () (interactive) (start-process-shell-command "alacritty" nil "alacritty -e nu"))
+	    
+    " ;"    execute-extended-command                                
+    "w f"   delete-frame                                           
+    "b"     consult-buffer                                          
     ;;"M-b"   '(ivy-switch-buffer                                       :wk "switch buffer")
-    "C-s"   '((lambda () (interactive) (guix))                        :wk "Guix")
-    "o"     '(nil                                                     :wk "org")
-    "o f"   '(my/org-open-file                                        :wk "open org file")
-    "o a"   '(org-agenda                                              :wk "org agenda")
-    "c"     '(org-capture                                             :wk "change directory")))
+    "C-s"   (lambda () (interactive) (guix))                        
+    "o f"   my/org-open-file                                        
+    "o a"   org-agenda                                              
+    "c"     org-capture))
+
+;; (setup (:require general)	     ;
+;;   ;; (:load-after evil)
+;;   ;; (:option general-evil-setup t)
+;;   (:global "C-c C-k" 'my-leader-command)
+;;   (general-create-definer my/leader-def
+;;     ;; :keymaps '(normal insert visual emacs)
+;;     :prefix "C-c C-k"
+;;     :global-prefix "C-c C-k"
+;;     :prefix-command 'my-leader-command
+;;     :prefix-map 'my-leader-mode-map)
+;;   (my/leader-def
+
+ 

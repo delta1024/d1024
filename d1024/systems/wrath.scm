@@ -5,6 +5,8 @@
   #:use-module (gnu system keyboard)
   #:use-module (gnu services xorg)
   #:use-module (gnu packages wm)
+  #:use-module (gnu system setuid)
+  #:use-module (gnu packages admin)
   #:use-module (gnu system mapped-devices)
   #:use-module (gnu home-services state)
   #:use-module (gnu system file-systems)
@@ -33,9 +35,11 @@
  (d1024 services x11))
 
 (define doas-config
-  "\
+  (plain-file "doas.conf"
+	      "\
 permit nopass jake as root cmd halt
-permit nopass jake as root cmd loginctl")
+permit nopass jake as root cmd loginctl
+"))
 
 (define channels
   (local-file 
@@ -99,13 +103,19 @@ permit nopass jake as root cmd loginctl")
 				   (keyboard-layout %my-keyboard-layout)))))
      (simple-service 'doas-conf
 		     etc-service-type
-		     (list `("doas.conf" ,(plain-file "doas.conf" doas-config))))
+		     (list `("doas.conf" ,doas-config)))
      (system-system-services (get-os full-default-system))))
    
    ((get-os system-swap)
     (list
      (swap-space
       (target "/tempSwap"))))
+   ((get-os system-setuid)
+    (append
+     (list (setuid-program
+	    (program (file-append opendoas "/bin/doas"))))
+     (system-setuid (get-os full-default-system))))
+
    ((get-user user-packages)
     (append
               desktop-packages
