@@ -15,7 +15,7 @@
 ;;;;;;;;;;;;;;;;;;;;xmodmap;;;;;;;;;;;;;;;;;;;
 (define xmodmaprc
   (plain-file "xmodmap"
-	      "\
+	      "
 clear lock
 clear control
 keycode 66 = Control_L

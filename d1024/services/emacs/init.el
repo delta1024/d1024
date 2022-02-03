@@ -1,5 +1,6 @@
 (customize-set-variable 'native-comp-async-report-warnings-errors nil)
 (require 'my-config)
+(customize-set-variable 'cursor-type 'bar)
 (add-hook 'emacs-startup-hook #'my/display-startup-time)
 (defvar bootstrap-version)
 
@@ -87,7 +88,7 @@
 				   ("odt" . "libreoffice -o"))))
 
 (define-prefix-command 'my-leader-command 'my-leader-mode-map "Shortcuts")
-(global-set-key (kbd "C-c C-k") #'my-leader-command)
+(global-set-key (kbd "C-c k") #'my-leader-command)
 
 (setup keys
   (:my-leader 
@@ -224,6 +225,8 @@
 (setup (:require doom-modeline)
   (:option doom-modeline-mode t
 	   doom-mode-line-height 13))
+(setup (:require company)
+  (add-hook 'after-init-hook 'global-company-mode))
 
 (setup (:require which-key)
   (:hide-mode which-key)
@@ -236,6 +239,7 @@
 (defun my/mode-hook ()
   "enables any minor modes that should be loaded after user
 settings have been applied"
+  (require 'org)
   (vertico-mode)
   ;; (evil-mode 1)
   ;; (evil-collection-init)
