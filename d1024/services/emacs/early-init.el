@@ -1,3 +1,5 @@
 (setq package-enable-at-startup nil)
+(setq cursor-type 'bar)
+(add-to-list 'load-path (expand-file-name "src" user-emacs-directory))
 (tool-bar-mode -1)
 (load-theme 'deeper-blue)

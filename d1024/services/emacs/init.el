@@ -1,20 +1,5 @@
 (customize-set-variable 'native-comp-async-report-warnings-errors nil)
-(defvar my/org-font "DejaVu Serif" "org-mode's variable pitched font name")
-(defvar my/user-font "Fira Code" "emacs's fixed width font")
-(defvar my/font-size 150 "font size for emacs")
-
-(defvar emacs-startup-time 
-  (format "%.2f seconds"
-	  (float-time
-	   (time-subtract after-init-time before-init-time))) "Emacs start up time")
-
-(defvar emacs-startup-gc
-  gcs-done "Number of garbage collections done at statup")
-
-(defun my/display-startup-time ()
-  (message "Emacs loaded in %s."
-	   emacs-startup-time))
-
+(require 'my-config)
 (add-hook 'emacs-startup-hook #'my/display-startup-time)
 (defvar bootstrap-version)
 
@@ -30,70 +15,7 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-(require 'setup)
-
-(setup-define :bind-map
-  (lambda (map key func)
-    `(define-key ,map ,(kbd key) #',func))
-  :documentation "Defines key on custom map without setups context"
-  :repeatable t
-  :after-loaded t)
-
-(setup-define :hide-mode
-  (lambda (&optional mode)
-    (let* ((mode (or mode (setup-get 'mode)))
-	   (mode (if (string-match-p "-mode\\'" (symbol-name mode))
-		     mode
-		   (intern (format "%s-mode" mode)))))
-      `(setq minor-mode-alist
-	     (delq (assq ',mode minor-mode-alist)
-		   minor-mode-alist))))
-  :documentation "Hide the mode-line lighter of the current mode.
-Alternatively, MODE can be specified manually, and override the
-current mode."
-  :after-loaded t)
-
-(setup-define :evil-collection
-  (lambda (evil-mode key binding &optional no-mode?)
-    (let* ((active-mode (setup-get 'mode))
-	   (active-map (if no-mode? active-mode
-			 (if (string-match-p "-mode\\'" (symbol-name active-mode))
-			     active-mode
-			   (intern (format "%s-mode" active-mode))))))
-      `(with-eval-after-load 'evil-collection
-	 (evil-collection-define-key ',evil-mode
-	   ',(intern (format "%s-map" active-map)) ,(kbd key) #',binding))))
-  :repeatable t
-  :documentation "creaes evil collection binding if no-mode? is t then `-mode' will be omitted from map name")
-
-(setup-define :autoload
-  (lambda (&rest load-function)
-    `(autoload ',(car load-function)
-       ,(nth 1 load-function) nil t))
-  :documentation "declare autoload for `function` from \"file\"")
-
-(setup-define :load-after
-  (lambda (&rest features)
-    (let ((body `(require ',(setup-get 'feature))))
-      (dolist (feature (nreverse features))
-	(setq body `(with-eval-after-load ',feature ,body)))
-      body))
-  :documentation "Load the current feature after FEATURES.")
-
-(setup-define :straight
-  (lambda (recipe)
-    `(unless (straight-use-package ',recipe)
-       ,(setup-quit)))
-  :documentation
-  "Install RECIPE with `straight-use-package'.
-This macro can be used as HEAD, and will replace itself with the
-first RECIPE's package."
-  :repeatable t
-  :shorthand (lambda (sexp)
-	       (let ((recipe (cadr sexp)))
-		 (if (consp recipe)
-		     (car recipe)
-		   recipe))))
+(require 'my-setup)
 (setq inhibit-startup-message t)
 
 ;; Redirect custom output
@@ -145,17 +67,17 @@ first RECIPE's package."
 		   :type git
 		   :host github
 		   :repo "mattiasb/dired-hide-dotfiles"))
-  (:bind-into dired "C-k" dired-hide-dotefiles-mode))
-  ;; (:with-mode dired
-  ;;   (:evil-collection normal "C-k" dired-hide-dotfiles-mode)))
+  (:bind-into dired "C-k" dired-hide-dotfiles-mode))
+;; (:with-mode dired
+;;   (:evil-collection normal "C-k" dired-hide-dotfiles-mode)))
 
-;; (setup (:straight (dired-single
-;; 		   :type git
-;; 		   :host github
-;; 		   :repo "crocket/dired-single"))
-;;   (:with-mode dired
-;;     (:evil-collection normal "h" dired-single-up-directory
-;; 		      normal "l" dired-single-buffer)))
+(setup (:straight (dired-single
+		   :type git
+		   :host github
+		   :repo "crocket/dired-single"))
+  (:with-mode dired (:remap-key dired-up-directory dired-single-up-directory
+				dired-find-file dired-single-buffer)))
+
 
 (setup (:straight dired-open)
   (:load-after dired)
@@ -164,23 +86,62 @@ first RECIPE's package."
 				   ("webm" . "mpv")
 				   ("odt" . "libreoffice -o"))))
 
-(load (expand-file-name "src/keybindings.el" user-emacs-directory))
-(load (expand-file-name "src/org.el" user-emacs-directory))
+(define-prefix-command 'my-leader-command 'my-leader-mode-map "Shortcuts")
+(global-set-key (kbd "C-c C-k") #'my-leader-command)
 
+(setup keys
+  (:my-leader 
+   "d"     ((lambda () (interactive) (dired "~/")) "dired ~") 
+   ;; "a"     (lambda () (interactive) (start-process-shell-command "alacritty" nil "alacritty --working-directory ~/ -e nu"))
+   ;; "A"     (lambda () (interactive) (start-process-shell-command "alacritty" nil "alacritty -e nu"))
+   " ;"    execute-extended-command                                
+   "w"     delete-frame                                           
+   "b"     consult-buffer                                          
+   "C-s"   ((lambda () (interactive) (guix)) "guix")
+   "C"     my/reconfigure-system
+   
+   
+   "c"     org-capture)
+  (:my-leader-group "f" "File Related Stuff"
+		    '(("f" find-file)
+		      ("s" save-buffer)
+		      ("r" (lambda (file)
+			     (interactive "FFile to open as root:")
+			     (let ((sudo-path (format "/sudo::%s" (expand-file-name file))))
+			       (find-file "/sudo::")))
+		       "Opens a file as root"))
+
+		    "h" "System Config"
+		    '(("e" (lambda () (interactive)
+			     (dired "~/.system/d1024/d1024/services/emacs")) "Emacs Configuration Dir")
+
+		      ("s" (lambda () (interactive)
+			     (dired "~/.system/d1024/d1024/systems")) "Systems Configuration Dir")
+
+		      ("h" (lambda () (interactive)
+			     (dired "~/.system/d1024/d1024/services")) "Services Configuration dir")
+
+		      ("d" (lambda () (interactive)
+			     (find-file (expand-file-name "stumpwm.cl" "~/.system/d1024/d1024/services/x11")))
+		       "Open Stumpwm Config"))
+
+		    "o" "Org Mode"
+		    '(("f" my/org-open-file)
+		      ("a" org-agenda))))
+
+(require 'my-org)
 (setup (:require rainbow-delimiters)
   (:hook-into prog-mode))  
 
-(define-key my-leader-mode-map "g" #'magit)
+(setup magit
+  (:my-leader
+   "g" magit))
 
 (setup (:require helpful)
   (:global "C-h f" helpful-callable
 	   "C-h v" helpful-variable
 	   "C-h k" helpful-key))
 
-(defun my/org-mode-visual-fill ()  
-  (setq visual-fill-column-width 115
-	visual-fill-column-center-text t)
-  (visual-fill-column-mode 1))
 
 (setup visual-fill-column
   (:load-after org)
@@ -203,16 +164,7 @@ first RECIPE's package."
     (:hook my/org-mode-visual-fill))
   (:with-mode markdown-mode
     (:hook my/org-mode-visual-fill)))
-(defun my/minibuffer-backward-kill (arg)
-  "When minibuffer is completing a file name delete up to parent
-    folder, otherwise delete a character backward"
-  (interactive "p")
-  (if minibuffer-completing-file-name
-      ;; Borrowed from https://github.com/raxod502/selectrum/issues/498#issuecomment-803283608
-      (if (string-match-p "/." (minibuffer-contents))
-          (zap-up-to-char (- arg) ?/)
-        (delete-minibuffer-contents))
-    (delete-backward-char arg)))
+
 
 (setup vertico
   (:option vertico-cycle t
@@ -222,11 +174,8 @@ first RECIPE's package."
 	     minibuffer-local-map "<backspace>" my/minibuffer-backward-kill))
 
 
-(setup embark
-  (:load-after evil)
+(setup (:require embark)
   (:autoload embark-prefix-help-command "embark")
-  (:bind-map evil-normal-state-map "C-." embark-act
-	     evil-normal-state-map "M-." embark-dwim)
   (:global "C-." embark-act
 	   "M-." embark-dwim
 	   "C-h B" embark-bindings)
@@ -284,12 +233,9 @@ first RECIPE's package."
 
 (setup (:require perspective))
 
-(defun configure-emacs ()
+(defun my/mode-hook ()
   "enables any minor modes that should be loaded after user
 settings have been applied"
-  ;; (require 'evil)
-  ;; (require 'evil-collection)
-  (require 'org)
   (vertico-mode)
   ;; (evil-mode 1)
   ;; (evil-collection-init)
@@ -301,11 +247,10 @@ settings have been applied"
   (disable-theme 'deeper-blue)
   (load-theme emacs-theme t))
 
-(defun my/post-config () "loads the custom file"
+(defun my/post-config-hook () "loads the custom file"
        (load custom-file :noerror)
-       (setq my/post-config t))
+       (setq my/post-config-hook t))
 
-(configure-emacs)
-(my/post-config)
-
-
+(add-hook 'my/config-hook #'my/mode-hook 99)
+(add-hook 'my/config-hook #'my/post-config-hook 100)
+(run-hooks 'my/config-hook)

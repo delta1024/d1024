@@ -1,6 +1,8 @@
+(add-hook 'my/config-hook (lambda ()
+			    (require 'org)))
 (defun my/org-open-file (a)  "Opens the file in `org-directory'"
-  (interactive (list (read-file-name "What File? " org-directory)))
-  (find-file  a))
+       (interactive (list (read-file-name "What File? " org-directory)))
+       (find-file  a))
 
 
 (setup (:straight (org-appear
@@ -136,3 +138,4 @@
 ;;   (\"C-c n d\" . org-roam-dailies-map)
 ;;   (\"C-c n d\" . org-roam-dailies-map)
 ;;   :config
+(provide 'my-org)

@@ -84,10 +84,10 @@
 				    "/init.el")))))
 (define emacs-aux-files
   (list
-   `("config/emacs/src/keybindings.el"
-     ,(local-file (string-append emacs-src-dir "/keybindings.el")))
-   `("config/emacs/src/org.el"
-     ,(local-file (string-append emacs-src-dir "/org.el")))))
+   `("config/emacs/src/my-setup.el"
+     ,(local-file (string-append emacs-src-dir "/my-setup.el")))
+   `("config/emacs/src/my-org.el"
+     ,(local-file (string-append emacs-src-dir "/my-org.el")))))
 
 (define-public emacs-services
   (list 
