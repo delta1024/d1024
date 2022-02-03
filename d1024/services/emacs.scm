@@ -86,9 +86,11 @@
   (list
    `("config/emacs/src/my-setup.el"
      ,(local-file (string-append emacs-src-dir "/my-setup.el")))
+   `("config/emacs/src/my-config.el"
+     ,(local-file (string-append emacs-src-dir "/my-config.el")))
    `("config/emacs/src/my-org.el"
-     ,(local-file (string-append emacs-src-dir "/my-org.el")))))
-
+     ,(local-file (string-append emacs-src-dir "/my-org.el"))))
+)
 (define-public emacs-services
   (list 
    (service  home-emacs-service-type
@@ -103,5 +105,4 @@
 	       init)))
    (simple-service 'emacs-support-files
 		   home-files-service-type
-		   emacs-aux-files)))
-	
+		   emacs-aux-files)))	
