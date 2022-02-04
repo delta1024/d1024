@@ -28,7 +28,6 @@
  (ice-9 regex)
  (guix gexp)
  (d1024 services symlinks)
- (d1024 services x11 stumpwm)
  (d1024 services emacs)
  (d1024 services shells)
  (d1024 services packages)
@@ -133,6 +132,5 @@ permit nopass jake as root cmd loginctl
      shell-services
      emacs-services
      guix-services
-     stumpwm-services
      xinitrc-personal))))
 

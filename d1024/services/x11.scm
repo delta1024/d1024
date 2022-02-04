@@ -99,6 +99,11 @@ keycode  22 = Tab ISO_Left_Tab Tab ISO_Left_Tab"))
 
 (define-public xinitrc-personal
   (append
+   (list
+    (simple-service 'stumpwm-config
+		    home-files-service-type
+		    `(("config/stumpwm/config"
+		       ,(local-file (string-append (getenv "HOME") "/.system/d1024/d1024/services/x11/stumpwm"))))))
    xclip-services
    redshift-services
    polybar-services

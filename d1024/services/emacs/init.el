@@ -123,7 +123,7 @@
 			     (dired "~/.system/d1024/d1024/services")) "Services Configuration dir")
 
 		      ("d" (lambda () (interactive)
-			     (find-file (expand-file-name "stumpwm.cl" "~/.system/d1024/d1024/services/x11")))
+			     (find-file (expand-file-name "stumpwm" "~/.system/d1024/d1024/services/x11")))
 		       "Open Stumpwm Config"))
 
 		    "o" "Org Mode"

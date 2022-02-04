@@ -1,0 +1,54 @@
+;;-*- mode: common-lisp; -*-
+
+(defcommand browser ()
+      ()
+      (run-shell-command "firefox"))
+
+(defcommand system-config-terminal ()
+  ()
+  (run-shell-command "alacritty --working-directory ~/.system"))
+
+(defcommand sys-suspend ()
+  ()
+  (run-shell-command "/home/jake/.scripts/prompt.sh 'Suspend System?' 'doas loginctl suspend'"))
+
+(defcommand sys-power-off ()
+  ()
+  (run-shell-command "/home/jake/.scripts/prompt.sh 'Powerdown System?' 'doas halt'"))
+
+(defvar *my-app-bindings*
+  (let ((m (stumpwm:make-sparse-keymap)))
+    (stumpwm:define-key m (stumpwm:kbd "b") "browser")
+    (stumpwm:define-key m (stumpwm:kbd "h") "system-config-terminal")
+    (stumpwm:define-key m (stumpwm:kbd "P") "sys-power-off")
+    (stumpwm:define-key m (stumpwm:kbd "p") "sys-suspend")
+    m))
+
+(stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd "j") '*my-app-bindings*)
+
+(defommand emacs ()
+  ()
+  (run-shell-command "emacsclient -c"))
+
+(defcommand alacritty ()
+  ()
+  (run-shell-command "alacritty"))
+
+;; (setf *startup-message* "Hello")
+
+;; (stumpwm:toggle-mode-line (stumpwm:current-screen)
+;;                  	     (stumpwm:current-head))
+;; (setf stumpwm:*screen-mode-line-format*
+;;     (list "%w | "
+;;          "%d"))
+
+;; (run-shell-command "xsetroot -cursor_name left_ptr")
+;; (run-shell-command "/home/jake/.bin/wallpaper.sh draw")
+
+(stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd "C-c") "alacritty")
+   (stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd "C-t") "send-raw-key")
+   (stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd "c") "alacritty")
+
+   
+
+		   
