@@ -88,9 +88,9 @@ bindkey -s '^o' lfcd")
 (define typos-grep-alias
   '( ( ".." . "'cd ..'")
      ( "pdw" . "pwd")
-     ( "grep" . "grep --color=auto")
-     ( "egrep" . "egrep --color=auto")
-     ( "fgrep" . "fgrep --color=auto")))
+     ( "grep" . "'grep --color=auto'")
+     ( "egrep" . "'egrep --color=auto'")
+     ( "fgrep" . "'fgrep --color=auto'")))
 
 (define git-alias
   '( ( "ga" . "\"git add\"")
@@ -103,22 +103,23 @@ bindkey -s '^o' lfcd")
      ( "gs" . "\"git status\"")))
 
 (define cargo-alias
-  '( ( "bcr" . "RUST_BACKTRACE=1 cargo run")
-     ( "cr" . "cargo run")
-     ( "ct" . "cargo test")
-     ( "cbr" . "cargo build --release")
-     ( "cch" . "cargo check")
-     ( "ccD" . "cargo doc --document-private-items")
-     ( "cCD" . "cargo doc --document-private-items --open")
-     ( "ccd" . "cargo doc")
-     ( "cCd" . "cargo doc --open")
-     ( "ccf" . "cargo fmt")
-     ( "cvm" . "nvim src/main.rs")
-     ( "cem" . "emacsclient -nw src/main.rs" )
-     ( "rustdoc" . "rustup doc&|")))
+  '( ( "bcr" . "'RUST_BACKTRACE=1 cargo run'")
+     ( "cr" . "'cargo run'")
+     ( "ct" . "'cargo test'")
+     ( "cbr" . "'cargo build --release'")
+     ( "cch" . "'cargo check'")
+     ( "ccD" . "'cargo doc --document-private-items'")
+     ( "cCD" . "'cargo doc --document-private-items --open'")
+     ( "ccd" . "'cargo doc'")
+     ( "cCd" . "'cargo doc --open'")
+     ( "ccf" . "'cargo fmt'")
+     ( "cvm" . "'nvim src/main.rs'")
+     ( "cem" . "'emacsclient -nw src/main.rs'" )
+     ( "rustdoc" . "'rustup doc&|'")))
 
 (define zalias
   (append
+   '(( "update-site" . "'rsync -vrP --exclude=\".git/\" --delete-after ~/website/ root@jakestannix.org:/var/www/personal'"))
    ls-alias
    typos-grep-alias
    git-alias

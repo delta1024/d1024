@@ -1,6 +1,39 @@
-(defvar my/org-font "DejaVu Serif" "org-mode's variable pitched font name")
+;;; my-config.el --- All of my personal variables and functions in one place
+
+;; Copyright (C) 2022 Jacob Stannix
+
+;; Author: Jacob Stannix
+;; Created: 27 Jan 2022
+
+;; This file is not part of GNU Emacs.
+
+;; This file is free software: you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation; either version 3 of
+;; the License, or (at your option) any later version.
+;; 
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+;; GNU General Public License for more details.
+;; 
+;; You should have received a copy of the GNU General Public
+;; License along with this file. If not, see
+;; https://www.gnu.org/licenses/.
+
+;;; Commentary:
+
+;; Personal functions and variables.
+
+;;; Code:
+
+(defvar my/org-font "DejaVu Serif"
+  "org-mode's variable pitched font name")
+
 (defvar my/user-font "Fira Code" "emacs's fixed width font")
+
 (defvar my/font-size 150 "font size for emacs")
+
 (defvar emacs-startup-time 
   (format "%.2f seconds"
 	  (float-time
@@ -14,27 +47,20 @@
 	   emacs-startup-time))
 
 (defun my/reconfigure-system (args)
+  "No Prefix: make
+C-u:       make build
+C-u C-u:   make sys"
   (interactive "P")
   (let ((default-directory (expand-file-name "" "~/.system")))
     (unless args
       (compile "make -k" t))
-    (if (equal args '(4))
-	(compile "make sys" t))
-    (if (equal args '(16))
-	(compile "make build" t))
-    ;; (pcase args
-    ;;   ((pred (lambda (item)
-    ;; 	       (equal item '(16))))
-    ;;    (progn
-    ;; 	 (eshell-command "make system")
-    ;; 	 (with-current-buffer "*Eshell Command Output*"
-    ;; 	   (special-mode)))))
-    ))
-
-(defun my/org-mode-visual-fill ()  
-  (setq visual-fill-column-width 115
-	visual-fill-column-center-text t)
-  (visual-fill-column-mode 1))
+    (pcase args
+      ((pred (lambda (item)
+	       (equal item '(4)))) 
+       (compile "make build" t))
+      ((pred (lambda (item)
+	       (equal item '(16))))
+       (compile "make sys" t)))))
 
 (defun my/minibuffer-backward-kill (arg)
   "When minibuffer is completing a file name delete up to parent
@@ -72,6 +98,10 @@
   (org-indent-mode)
   (org-bullets-mode)
   (visual-line-mode 1))
+
 (defvar my/org-ellipsis " ▾")
+
 (defvar my/org-bullets '("◉" "○" "●" "○" "●" "○" "●"))
+
 (provide 'my-config)
+;;; my-config.el ends here

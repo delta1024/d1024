@@ -19,6 +19,7 @@
   #:use-module (gnu packages image-viewers)
   #:use-module (gnu packages mpd)
   #:use-module (gnu packages xdisorg)
+  #:use-module (gnu packages rsync)
   #:use-module (gnu packages pulseaudio)
   #:use-module (gnu packages disk)
   #:use-module (gnu packages shells)
@@ -49,11 +50,12 @@
         zsh
         ispell
 	;; opendoas
-;;	password-store
+        password-store
         pinentry
         zip
         unzip
-        htop
+	rsync
+	htop
         nushell
         fontconfig
         neovim))

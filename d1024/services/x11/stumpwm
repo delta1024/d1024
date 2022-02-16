@@ -1,34 +1,33 @@
-;;-*- mode: common-lisp; -*-
+
 
 (defcommand browser ()
       ()
       (run-shell-command "firefox"))
-
-(defcommand system-config-terminal ()
+(defcommand emacs ()
   ()
-  (run-shell-command "alacritty --working-directory ~/.system"))
+  (run-shell-command "emacsclient -c"))
 
-(defcommand sys-suspend ()
-  ()
-  (run-shell-command "/home/jake/.scripts/prompt.sh 'Suspend System?' 'doas loginctl suspend'"))
+(defcommand working-term (dir)
+  ((:string "Working directory: "))
+  (run-shell-command (concatenate "alacritty --working-dircetory ~/.system" dir)))
 
-(defcommand sys-power-off ()
-  ()
-  (run-shell-command "/home/jake/.scripts/prompt.sh 'Powerdown System?' 'doas halt'"))
+(defcommand sys-suspend (answer)
+  ((:y-or-n "Suspend System?"))
+  (if answer (run-shell-command "doas loginctl suspend")))
+
+(defcommand sys-power-off (answer)
+  ((:y-or-n "Powerdown System?"))
+  (if answer (run-shell-command "doas halt")))
 
 (defvar *my-app-bindings*
   (let ((m (stumpwm:make-sparse-keymap)))
     (stumpwm:define-key m (stumpwm:kbd "b") "browser")
-    (stumpwm:define-key m (stumpwm:kbd "h") "system-config-terminal")
+    (stumpwm:define-key m (stumpwm:kbd "h") "working-term")
     (stumpwm:define-key m (stumpwm:kbd "P") "sys-power-off")
     (stumpwm:define-key m (stumpwm:kbd "p") "sys-suspend")
     m))
 
 (stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd "j") '*my-app-bindings*)
-
-(defommand emacs ()
-  ()
-  (run-shell-command "emacsclient -c"))
 
 (defcommand alacritty ()
   ()
@@ -42,13 +41,11 @@
 ;;     (list "%w | "
 ;;          "%d"))
 
-;; (run-shell-command "xsetroot -cursor_name left_ptr")
-;; (run-shell-command "/home/jake/.bin/wallpaper.sh draw")
+(run-shell-command "xsetroot -cursor_name left_ptr")
 
+(run-shell-command "/home/jake/.bin/wallpaper.sh draw")
+
+(stumpwm:set-prefix-key (stumpwm:kbd "C-z"))
 (stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd "C-c") "alacritty")
-   (stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd "C-t") "send-raw-key")
-   (stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd "c") "alacritty")
-
-   
-
-		   
+(stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd "C-t") "send-raw-key")
+(stumpwm:define-key stumpwm:*root-map* (stumpwm:kbd "c") "alacritty")

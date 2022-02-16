@@ -1,4 +1,5 @@
 (define-module (d1024 services emacs)
+  #:use-module (d1024 services packages)
   #:use-module (gnu packages)
   #:use-module (gnu packages emacs)
   #:use-module (gnu packages emacs-xyz)
@@ -10,6 +11,7 @@
   #:use-module (gnu home-services emacs)
   #:use-module (srfi srfi-11)
   #:use-module (guix packages)
+  #:use-module (flat packages emacs)
   #:use-module (guix gexp)
   #:use-module (guix transformations)
   #:use-module (guix channels)
@@ -26,10 +28,7 @@
 	 "emacs-ace-window"
 	 "emacs-org-roam"
 	 "emacs-setup"
-	 "emacs-use-package"
 	 "emacs-no-littering"
-	 "emacs-evil"
-	 "emacs-evil-collection"
 	 "emacs-general"
 	 "emacs-all-the-icons-dired"
 	 "emacs-lsp-mode"
@@ -55,29 +54,32 @@
 	 "emacs-ivy-rich"
 	 "emacs-company"
 	 "emacs-projectile"
-	 "emacs-lispy"
-	 "emacs-lispyville"
+	 ;; "emacs-lispy"
+	 ;; "emacs-lispyville"
 	 "emacs-counsel-projectile"
 	 "emacs-magit"
-	 ;;"emacs-pass"
+	 "emacs-pass"
 	 "emacs-pinentry"
+	 "emacs-stumpwm-mode"
 	 "emacs-helpful"
 	 "emacs-doom-themes"
 	 "emacs-all-the-icons"
 	 "emacs-doom-modeline"
 	 "emacs-rainbow-delimiters"
-	 "emacs-which-key"
-	 "emacs-swiper"
+	 ;; "emacs-swiper"
 	 "emacs-pdf-tools"
-	 "emacs-perspective")))
+	 ;; "emacs-perspective"
+	 )))
+
 (define emacs-src-dir
-   (string-append (getenv "HOME") "/.system/d1024/d1024/services/emacs"))
+  (string-append (getenv "HOME") "/.system/d1024/d1024/services/emacs"))
+
 (define early-init
   (list
    (slurp-file-gexp
     (local-file
-		     (string-append emacs-src-dir
-				    "/early-init.el")))))
+     (string-append emacs-src-dir
+		    "/early-init.el")))))
 (define init
   (list
    (slurp-file-gexp (local-file
@@ -90,13 +92,13 @@
    `("config/emacs/src/my-config.el"
      ,(local-file (string-append emacs-src-dir "/my-config.el")))
    `("config/emacs/src/my-org.el"
-     ,(local-file (string-append emacs-src-dir "/my-org.el"))))
-)
+     ,(local-file (string-append emacs-src-dir "/my-org.el")))))
+
 (define-public emacs-services
   (list 
    (service  home-emacs-service-type
 	     (home-emacs-configuration
-	      (package emacs-next)
+	      (package emacs-native-comp)
 	      (elisp-packages
 	       packages)
 	      (server-mode? #t)

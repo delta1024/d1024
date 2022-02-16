@@ -1,9 +1,14 @@
 LOAD_PATH = GUILE_LOAD_PATH=./d1024
 TARGET = D1024_TARGET=
 
-home:
+build:
+	${LOAD_PATH} ${TARGET}home \
+	guix home --cores=7 build ./config.scm
+
+install:
 	${LOAD_PATH}  ${TARGET}home \
 	guix home reconfigure ./config.scm
+
 system:
 	${LOAD_PATH} ${TARGET}system \
 	sudo -E guix system reconfigure ./config.scm
@@ -28,9 +33,6 @@ lock-system: d1024/channel-lock.scm
 	${LOAD_PATH} ${TARGET}system \
 	sudo -E guix time-machine -C ./d1024/channel-lock.scm -- \
 	system reconfigure ./config.scm
-build:
-	${LOAD_PATH} ${TARGET}home \
-	guix home --cores=7 build ./config.scm
 sys:
 	${LOAD_PATH} ${TARGET}system \
 	guix system --cores=7 build ./config.scm
