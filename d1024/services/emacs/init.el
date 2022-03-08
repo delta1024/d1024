@@ -29,7 +29,7 @@
 ;; Redirect custom output
 (setq custom-file (expand-file-name "emacs-custom.el" user-emacs-directory))
 
-(setq emacs-theme 'doom-horizon)
+(setq emacs-theme  'doom-acario-dark)
 
 ;; sets fixed-width font
 (set-face-attribute 'default nil :font my/user-font :height my/font-size :weight 'regular)
@@ -90,10 +90,12 @@
 (define-prefix-command 'my-leader-command 'my-leader-mode-map "Shortcuts")
 (global-set-key (kbd "C-c c") #'my-leader-command)
 
+
 (setup keys
   (:my-leader 
    "d"     ((lambda () (interactive) (dired "~/")) "dired ~") 
-   "p"     ((lambda () (interactive) (dired "~/Projects")))
+   "p"     ((lambda () (interactive) (dired "~/Projects")) "")
+   "P"     ((lambda () (interactive) (dired "~/Projects/Code/The C Programing Language")) "")
    ";"     execute-extended-command                                
    "w"     delete-frame                                           
    "b"     consult-buffer                                          
@@ -108,16 +110,16 @@
 			     (let ((sudo-path (format "/sudo::%s" (expand-file-name file))))
 			       (find-file "/sudo::")))
 		       "Opens a file as root"))
-		       "h" "System Config"
-		     '(("e" (lambda () (interactive)
-			      (dired "~/.system/d1024/d1024/services/emacs")) "Emacs Configuration Dir")
-		       ("s" (lambda () (interactive)
-			      (dired "~/.system/d1024/d1024/systems")) "Systems Configuration Dir")
-		       ("h" (lambda () (interactive)
-			      (dired "~/.system/d1024/d1024/services")) "Services Configuration dir")
-		       ("d" (lambda () (interactive)
-			      (find-file (expand-file-name "stumpwm" "~/.system/d1024/d1024/services/x11")))
-			"Open Stumpwm Config"))
+		    "h" "System Config"
+		    '(("e" (lambda () (interactive)
+			     (dired "~/.system/d1024/d1024/services/emacs")) "Emacs Configuration Dir")
+		      ("s" (lambda () (interactive)
+			     (dired "~/.system/d1024/d1024/systems")) "Systems Configuration Dir")
+		      ("h" (lambda () (interactive)
+			     (dired "~/.system/d1024/d1024/services")) "Services Configuration dir")
+		      ("d" (lambda () (interactive)
+			     (find-file (expand-file-name "stumpwm" "~/.system/d1024/d1024/services/x11")))
+		       "Open Stumpwm Config"))
 		    "o" "Org Mode"
 		    '(("f" my/org-open-file)
 		      ("a" org-agenda))))
@@ -134,6 +136,83 @@
   (:global "C-h f" helpful-callable
 	   "C-h v" helpful-variable
 	   "C-h k" helpful-key))
+
+(define-prefix-command 'my-eglot-prefix 'my-eglot-map "eglot LSP bindings")
+(with-eval-after-load 'eglot
+  (define-key eglot-mode-map (kbd "C-c l") #'my-eglot-prefix))
+(define-key my-eglot-map (kbd "f") #'eglot-format)
+(define-key my-eglot-map (kbd "F") #'eglot-format-buffer)
+(define-key my-eglot-map (kbd "o") #'eglot-code-action-organize-imports)
+(define-key my-eglot-map (kbd ".") #'xref-find-definitions)
+
+(setup c-mode
+  (:hook eglot-ensure)
+  (:option eglot-send-changes-idle-time 0.25))
+
+(auto-insert-mode 1)
+
+;;;;;; Makefile ;;;;;;;
+
+(define-auto-insert
+  '("header\\.mk" . "Makefile Header")
+  '(nil
+    "CC = " (skeleton-read "Compiler (default 'gcc'): ") | "gcc" \n
+    "CFLAGS = " (skeleton-read "CFlags (default '-Wall -g -o'): ") | "-Wall -g -o" \n
+    "IN = " (skeleton-read "Source Directory (default 'src'): ") | "src" \n
+    "OUT = " (skeleton-read "Output Directory (default 'bin'):") | "bin" \n
+    "TARGETS = " (skeleton-read "Targets: ") \n
+    "TARGETS := $(addprefix $(OUT)/,$(TARGETS))"))
+
+(define-auto-insert
+  '("main\\.mk" . "Main Executable Makefile")
+  '("Executable Name: "
+    \n \n
+    "$(OUT)/" str ": $(IN)/main.c $(DEPENDENCIES) | $(OUT)" \n
+    "	$(CC) $^ $(CFLAGS) $@"))
+
+(define-auto-insert
+  "Makefile"
+  '(nil
+    "include mk/header.mk"\n \n
+    "define FILES" \n
+    "main.mk" \n
+    "endef" \n 
+    "FILES := $(addprefix mk/,$(FILES))" \n \n
+    ".PHONY: clean all view" \n \n
+    "include $(FILES)" \n \n
+    "all: $(TARGETS) | $(OUT)" \n \n
+    "$(OUT):" \n
+    "	mkdir $@" \n \n
+    "include $(FILES)"\n \n
+    "clean:" \n
+    "	rm -rf $(OUT)" \n \n
+    "view:" \n
+    "    @echo -e \"\\n\" | cat mk/header.mk - Makefile - $(FILES) | less"
+    (mkdir "mk")))
+
+(define-skeleton makefile-skel-add-binary
+  "inserts a binary definition"
+  "Binary Name: "
+  str \n
+  "$(OUT)/" str ": $(IN)/$(basename " str ").c | $(OUT)" \n
+  "	$(CC) $^ $(CFLAGS) $@")
+
+(define-skeleton makefile-skel-add-dependency
+  "inserts a dependency block to your makefile"
+  "Dependency base name: "
+  - str \n
+  "$(OUT)/" str ": $(IN)/$(basename " str ").c"
+  (when (y-or-n-p "Is there a header file?")
+    (concat " $(IN)/$(basename " str ").h"))
+  " | $(OUT) " \n
+  "	$(CC) $< -c $(CFLAGS) $@")
+
+(define-prefix-command 'makefile-skel-prefix)
+(define-key makefile-skel-prefix (kbd "d") #'makefile-skel-add-dependency)
+(define-key makefile-skel-prefix (kbd "b") #'makefile-skel-add-binary)
+
+(with-eval-after-load 'make-mode
+  (define-key makefile-mode-map (kbd "C-c i") #'makefile-skel-prefix))
 
 (setup visual-fill-column
   (:load-after org)
@@ -173,7 +252,7 @@
 
 (setup (:require savehist))
 (add-hook 'my/config-hook (lambda ()
-			     (savehist-mode 1)))
+			    (savehist-mode 1)))
 (setup (:require selectrum))
 
 (setup (:require consult)
@@ -182,7 +261,7 @@
 (setup marginalia
   (:bind-map minibuffer-local-map "M-A" marginalia-cycle))
 (add-hook 'my/config-hook (lambda ()
-			   (marginalia-mode 1)))
+			    (marginalia-mode 1)))
 ;; (setup (:require lispy)
 ;;   (:hook-into emacs-lisp-mode
 ;; 	      lisp-mode
@@ -208,21 +287,21 @@
   (add-hook 'after-init-hook 'global-company-mode)
   (:option company-selection-wrap-around t))
 
+(setq site-skeletons-map-key (kbd "C-c s"))
+
+(autoload #'site-skeletons-prefix "site-skeletons" nil t 'keymap)
+(global-set-key (kbd "C-c s") #'site-skeletons-prefix)
+
 ;; (setup (:require swiper))
 
 ;;(setup (:require perspective))
 ;;(add-hook 'my/config-hook (lambda ()) persp-mode 1)
-(defun my/set-emacs-theme ()
-  "Sets the emacs theme"
-  (interactive)
-  (disable-theme emacs-theme)
-  (load-theme emacs-theme t))
-
-(add-hook 'my/config-hook #'my/set-emacs-theme 1)
 
 (defun my/post-config-hook () "loads the custom file"
        (load custom-file :noerror)
-       (setq my/post-config-hook t))
+       (setq my/post-config-hook t)
+       (disable-theme 'deeper-blue)
+       (load-theme emacs-theme t))
 
 (add-hook 'my/config-hook #'my/post-config-hook 100)
 (run-hooks 'my/config-hook)

@@ -26,7 +26,9 @@
   #:use-module (gnu packages aspell)
   #:use-module (gnu packages password-utils)
   #:use-module (gnu packages gnupg)
+  #:use-module (gnu packages rust-apps)
   #:use-module (gnu packages compression)
+  #:use-module (gnu packages llvm)
   #:use-module (nongnu packages mozilla)
   #:use-module (gnu packages vim)
   #:use-module (guix inferior)
@@ -51,6 +53,8 @@
         ispell
 	;; opendoas
         password-store
+	ripgrep
+	clang
         pinentry
         zip
         unzip

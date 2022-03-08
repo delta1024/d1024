@@ -119,7 +119,6 @@ bindkey -s '^o' lfcd")
 
 (define zalias
   (append
-   '(( "update-site" . "'rsync -vrP --exclude=\".git/\" --delete-after ~/website/ root@jakestannix.org:/var/www/personal'"))
    ls-alias
    typos-grep-alias
    git-alias

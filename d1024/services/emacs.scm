@@ -1,6 +1,7 @@
 (define-module (d1024 services emacs)
   #:use-module (d1024 services packages)
   #:use-module (gnu packages)
+  #:use-module (gnu packages cpp)
   #:use-module (gnu packages emacs)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu services)
@@ -25,7 +26,9 @@
   (map (compose specification->package)
        '("emacs-guix"
 	 "emacs-org-bullets"
+	 "emacs-eglot"
 	 "emacs-ace-window"
+	 "ccls"
 	 "emacs-org-roam"
 	 "emacs-setup"
 	 "emacs-no-littering"

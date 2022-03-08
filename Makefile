@@ -1,13 +1,13 @@
 LOAD_PATH = GUILE_LOAD_PATH=./d1024
 TARGET = D1024_TARGET=
 
-build:
-	${LOAD_PATH} ${TARGET}home \
-	guix home --cores=7 build ./config.scm
-
 install:
 	${LOAD_PATH}  ${TARGET}home \
 	guix home reconfigure ./config.scm
+
+build:
+	${LOAD_PATH} ${TARGET}home \
+	guix home --cores=7 build ./config.scm
 
 system:
 	${LOAD_PATH} ${TARGET}system \
@@ -50,3 +50,6 @@ check-system:
 	guix system -n build ./config.scm
 repl:
 	${LOAD_PATH} guix repl
+
+upgrade:
+	$(MAKE) build sys install system
